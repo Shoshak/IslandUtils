@@ -1,7 +1,6 @@
 package net.asodev.islandutils.modules;
 
 import net.asodev.islandutils.options.IslandOptions;
-import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.MusicUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -14,43 +13,44 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static net.minecraft.network.chat.Component.literal;
 
 public class ClassicAnnouncer {
+    private long lastTrapTimestamp;
 
-    public static long lastTrapTimestamp = 0;
-    public static String trap;
+    private final Style trapStyle;
 
-    static TextColor textColor = ChatUtils.parseColor("#FFA800"); // Trap Title Text Color
-    static Style style = Style.EMPTY.withColor(textColor); // Style for the trap color
-    public static void handleTrap(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket, CallbackInfo ci) {
-        if (!IslandOptions.getClassicHITW().isClassicHITW()) return; // Requires isClassicHITW
-        String trap = clientboundSetSubtitleTextPacket.text().getString(); // Get the string version of the subtitle
+    public ClassicAnnouncer(TextColor trapColor) {
+        this.trapStyle = Style.EMPTY.withColor(trapColor);
+    }
 
-        boolean isTrap = false; // Get all the elements in this component
-        for (Component component : clientboundSetSubtitleTextPacket.text().toFlatList()) {
-            if (component.getStyle().isObfuscated()) { return; } // If this component is obfuscated, it's the animation before the trap
-            if (component.getStyle().getColor() != null && component.getStyle().getColor().equals(textColor))
-                isTrap = true; // If it's the gold color of the trap subtitle, it's a trap!
-        }
-        if (!isTrap) return; // If we didn't find the trap, we can just stop
+    public void handleTrap(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket, CallbackInfo ci) {
+        if (!IslandOptions.getClassicHITW().isClassicHITW()) return;
+        Component subtitle = clientboundSetSubtitleTextPacket.text();
 
-        String change = changeName(trap); // Check for the changed trap names
-        if (change != null) { // If we have changed the name of the trap
-            Minecraft.getInstance().gui.setSubtitle(literal(change).withStyle(style)); // Send our own subtitle
-            ci.cancel(); // Cancel minecraft executing futher
+        boolean isTrap = subtitle
+                .toFlatList()
+                .stream()
+                .map(Component::getStyle)
+                .anyMatch(style -> {
+                    TextColor color = style.getColor();
+                    if (color == null) return false;
+                    return color.equals(trapStyle.getColor());
+                });
+        if (!isTrap) return;
+
+        String trapName = subtitle.getString();
+
+        String changedTrapName = changeName(trapName);
+        if (!(changedTrapName.equals(trapName))) {
+            Minecraft.getInstance().gui.setSubtitle(literal(changedTrapName).withStyle(trapStyle));
+            ci.cancel(); // Cancel minecraft executing further
         }
 
         long timestamp = System.currentTimeMillis(); // This just ensures we don't play the sound twice
-        if ((timestamp - ClassicAnnouncer.lastTrapTimestamp) < 50) return; // 50ms delay
-        ClassicAnnouncer.lastTrapTimestamp = timestamp;
+        if ((timestamp - lastTrapTimestamp) < 50) return; // 50ms delay
+        lastTrapTimestamp = timestamp;
 
-        trap = trap.replaceAll("([ \\-!])","").toLowerCase(); // Convert the trap to a lowercase space-less string
-
-        try {
-            ClassicAnnouncer.trap = trap; // Set the trap to the one we just found
-            ResourceLocation sound = new ResourceLocation("island", "announcer." + trap); // island:announcer.(trap) -> The sound location
-            Minecraft.getInstance().getSoundManager().play(MusicUtil.createSoundInstance(sound)); // Play the sound!!
-        } catch (Exception e) {
-            e.printStackTrace(); // Something went horribly wrong, probably an invalid character
-        }
+        trapName = trapName.replaceAll("([ \\-!])","").toLowerCase();
+        ResourceLocation soundLocation = new ResourceLocation("island", "announcer." + trapName);
+        Minecraft.getInstance().getSoundManager().play(MusicUtil.createSoundInstance(soundLocation));
     }
 
     private static String changeName(String originalTrap) {
@@ -61,7 +61,7 @@ public class ClassicAnnouncer {
             case "Pillagers" -> "So Lonely";
             case "Leg Day" -> "Molasses";
             case "Snowball Fight" -> "Jack Frost";
-            default -> null;
+            default -> originalTrap;
         };
     }
 
