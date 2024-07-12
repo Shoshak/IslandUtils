@@ -53,8 +53,8 @@ public class MccIslandNotifs {
                 .setStyle(Style.EMPTY.withBold(true));
 
         String bytesText = Unit.humanReadable(currentDownload.getBytesDownloaded());
-        OptionalLong size = currentDownload.getSize();
-        String maxSize = size.isPresent() ? " / " + Unit.humanReadable(size.getAsLong()) : "";
+        long size = currentDownload.getSize();
+        String maxSize = size != -1 ? " / " + Unit.humanReadable(size) : "";
         Component downloadProgress = Component.literal(" " + bytesText + maxSize);
 
         components.add(downloadTitle);

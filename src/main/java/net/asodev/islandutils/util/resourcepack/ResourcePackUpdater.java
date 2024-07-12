@@ -1,10 +1,6 @@
 package net.asodev.islandutils.util.resourcepack;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
-import com.mojang.realmsclient.Unit;
 import net.asodev.islandutils.util.resourcepack.schema.ResourcePack;
 import net.minecraft.FileUtil;
 import net.minecraft.client.Minecraft;
@@ -12,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackSelectionConfig;
-import net.minecraft.server.packs.repository.KnownPack;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
@@ -123,10 +118,10 @@ public class ResourcePackUpdater {
         logger.info("Requesting resource pack...");
         try {
             ResourcePack current = ResourcePackOptions.get();
-            logger.info("Current resource pack version: " + current);
+            logger.info("Current resource pack version: {}", current);
 
             ResourcePack rp = requestUpdate();
-            logger.info("Received Resource Pack: " + rp.rev);
+            logger.info("Received Resource Pack: {}", rp.rev);
             if (current != null && Objects.equals(current.rev, rp.rev) && file.exists()) {
                 logger.info("Resource pack has not changed. Not downloading!");
                 apply(file, false);
@@ -146,7 +141,7 @@ public class ResourcePackUpdater {
 
     private ResourcePack requestUpdate() throws Exception {
         HttpRequest req = HttpRequest.newBuilder(URI.create(url)).GET().build();
-        logger.info("Requesting resource pack: " + req.uri());
+        logger.info("Requesting resource pack: {}", req.uri());
         HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200) {
             throw new RuntimeException("Got " + res.statusCode() + "code from github. Response:" + res.body());
@@ -155,13 +150,13 @@ public class ResourcePackUpdater {
     }
 
     public static class PackDownloadListener implements HttpUtil.DownloadProgressListener {
-        private OptionalLong size = OptionalLong.empty();
-        private long bytesDownloaded = 0;
+        private long size = -1;
+        private long bytesDownloaded;
 
         @Override
         public void downloadStart(OptionalLong optionalLong) {
-            logger.info("Downloading IslandUtils Resources... Size: " + optionalLong);
-            size = optionalLong;
+            logger.info("Downloading IslandUtils Resources... Size: {}", optionalLong);
+            optionalLong.ifPresent(s -> size = s);
         }
 
         @Override
@@ -169,9 +164,10 @@ public class ResourcePackUpdater {
             bytesDownloaded = l;
         }
 
-        public OptionalLong getSize() {
+        public long getSize() {
             return size;
         }
+
         public long getBytesDownloaded() {
             return bytesDownloaded;
         }
