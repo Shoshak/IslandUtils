@@ -1,6 +1,5 @@
 package net.asodev.islandutils.util;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;

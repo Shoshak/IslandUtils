@@ -3,7 +3,6 @@ package net.asodev.islandutils.mixins;
 import net.asodev.islandutils.IslandUtils;
 import net.asodev.islandutils.util.ChatUtils;
 import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -12,8 +11,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static net.asodev.islandutils.IslandUtils.packUpdater;
 
 @Mixin(TitleScreen.class)
 public abstract class MainScreenMixin extends Screen {
