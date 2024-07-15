@@ -2,7 +2,6 @@ package net.asodev.islandutils.mixins.crafting;
 
 import net.asodev.islandutils.modules.scavenging.Scavenging;
 import net.asodev.islandutils.modules.scavenging.ScavengingTotalList;
-import net.asodev.islandutils.state.MccIslandState;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;

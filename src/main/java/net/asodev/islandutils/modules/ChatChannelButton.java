@@ -1,7 +1,6 @@
 package net.asodev.islandutils.modules;
 
 import net.asodev.islandutils.modules.plobby.PlobbyFeatures;
-import net.asodev.islandutils.state.MccIslandState;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;

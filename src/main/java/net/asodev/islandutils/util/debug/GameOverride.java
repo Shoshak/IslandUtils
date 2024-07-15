@@ -2,8 +2,6 @@ package net.asodev.islandutils.util.debug;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.asodev.islandutils.state.Game;
-import net.asodev.islandutils.state.MccIslandState;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;

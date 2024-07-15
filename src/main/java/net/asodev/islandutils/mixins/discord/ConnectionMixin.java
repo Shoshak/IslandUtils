@@ -1,9 +1,7 @@
 package net.asodev.islandutils.mixins.discord;
 
 import net.asodev.islandutils.IslandUtilsEvents;
-import net.asodev.islandutils.discord.DiscordPresenceUpdator;
-import net.asodev.islandutils.state.Game;
-import net.asodev.islandutils.state.MccIslandState;
+import net.asodev.islandutils.discord.DiscordPresenceUpdater;
 import net.asodev.islandutils.util.ChatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
@@ -36,8 +34,8 @@ public abstract class ConnectionMixin {
             Minecraft minecraft = Minecraft.getInstance();
             if (hostName.contains("mccisland.net") && packetListener == minecraft.getConnection()) {
                 ChatUtils.debug("Disconnected from MCC Island.");
-                DiscordPresenceUpdator.started = null;
-                DiscordPresenceUpdator.clear();
+                DiscordPresenceUpdater presenceUpdater = DiscordPresenceUpdater.getInstance();
+                DiscordPresenceUpdater.started = null;
                 IslandUtilsEvents.QUIT_MCCI.invoker().onEvent();
                 MccIslandState.setGame(Game.HUB);
             }

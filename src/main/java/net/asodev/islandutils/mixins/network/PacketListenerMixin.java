@@ -5,13 +5,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.asodev.islandutils.IslandUtilsClient;
 import net.asodev.islandutils.IslandUtilsEvents;
-import net.asodev.islandutils.discord.DiscordPresenceUpdator;
+import net.asodev.islandutils.discord.DiscordPresenceUpdater;
 import net.asodev.islandutils.modules.FriendsInGame;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.IslandSoundCategories;
 import net.asodev.islandutils.modules.ClassicAnnouncer;
-import net.asodev.islandutils.state.MccIslandState;
-import net.asodev.islandutils.state.Game;
 import net.asodev.islandutils.modules.cosmetics.CosmeticSlot;
 import net.asodev.islandutils.modules.cosmetics.CosmeticState;
 import net.asodev.islandutils.modules.splits.LevelTimer;
@@ -64,6 +62,8 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
             "COURSE", Pattern.compile("COURSE: (?<course>.*)"),
             "LEAP", Pattern.compile("LEAP \\[(?<leap>.*/.*)]")
     );
+
+
     @Inject(method = "handleSetPlayerTeamPacket", at = @At("TAIL")) // Scoreboard lines!
     public void handleSetPlayerTeamPacket(ClientboundSetPlayerTeamPacket clientboundSetPlayerTeamPacket, CallbackInfo ci) {
         if (!MccIslandState.isOnline()) return;
@@ -84,10 +84,10 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
                     case "MAP" -> MccIslandState.setMap(value); // Set our MAP
                     case "MODIFIER" -> MccIslandState.setModifier(value); // Set our MODIFIER
                     case "COURSE" -> {
-                        DiscordPresenceUpdator.courseScoreboardUpdate(value, true);
+                        DiscordPresenceUpdater.courseScoreboardUpdate(value, true);
                         MccIslandState.setMap(value);
                     }
-                    case "LEAP" -> DiscordPresenceUpdator.leapScoreboardUpdate(value, true);
+                    case "LEAP" -> DiscordPresenceUpdater.leapScoreboardUpdate(value, true);
                 }
 
                 ChatUtils.debug("ScoreboardUpdate - Current %s: \"%s\"", entry.getKey(), value);
@@ -197,14 +197,14 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
                     long secondsLeft = ((mins * 60L) + secs+1);
                     long finalUnix = System.currentTimeMillis() + (secondsLeft * 1000); // Get the timestamp when the game will end
 
-                    DiscordPresenceUpdator.timeLeftBossbar = uUID; // why do i do this again?
-                    DiscordPresenceUpdator.updateTimeLeft(finalUnix); // Update our time left!!
+                    DiscordPresenceUpdater.timeLeftBossbar = uUID; // why do i do this again?
+                    DiscordPresenceUpdater.updateTimeLeft(finalUnix); // Update our time left!!
                 } catch (Exception ignored) {}
             }
             @Override
             public void remove(UUID uUID) { // tbf, i don't this is ever called, but y'know, just to be sure
-                if (DiscordPresenceUpdator.timeLeftBossbar == uUID)
-                    DiscordPresenceUpdator.updateTimeLeft(null);
+                if (DiscordPresenceUpdater.timeLeftBossbar == uUID)
+                    DiscordPresenceUpdater.updateTimeLeft(null);
             }
         };
         clientboundBossEventPacket.dispatch(bossbarHandler); // Execute the handler!

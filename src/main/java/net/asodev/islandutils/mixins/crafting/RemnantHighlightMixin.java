@@ -1,6 +1,5 @@
 package net.asodev.islandutils.mixins.crafting;
 
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.util.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

@@ -2,65 +2,72 @@ package net.asodev.islandutils.discord;
 
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
-
-import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiscordPresence {
-    
-    static Core core;
-    static boolean initalised = false;
+    private static volatile DiscordPresence instance;
+    private final Logger logger = LoggerFactory.getLogger(DiscordPresence.class);
 
-    static String os = System.getProperty("os.name").toLowerCase();
+    private volatile Core core;
 
-    public static boolean init() {
-        if (initalised) return true;
+    private DiscordPresence() {
+//        NativeLibrary nativeLibrary = new NativeLibrary();
 
-        File discordLibrary;
-        try {
-            discordLibrary = NativeLibrary.grabDiscordNative();
-            File discordJNI = NativeLibrary.grabDiscordJNI();
+//        File discordLibrary = nativeLibrary.getDiscordNative();
+//        File discordJNI = nativeLibrary.getDiscordJNI();
+//        System.load(discordLibrary.getAbsolutePath());
+//        System.load(discordJNI.getAbsolutePath());
 
-            if (os.contains("windows")) System.load(discordLibrary.getAbsolutePath());
-            System.load(discordJNI.getAbsolutePath());
-        } catch (Exception e) {
-            System.out.println("Failed to grab Natives: " + e.getMessage());
-            return false;
-        }
+        Core.initFromClasspath();
 
-        Core.initDiscordNative(discordLibrary.getAbsolutePath());
+    }
 
-        CreateParams params = new CreateParams();
-        params.setClientID(1027930697417101344L);
-        params.setFlags(CreateParams.Flags.NO_REQUIRE_DISCORD);
-
-        try {
-            core = new Core(params);
-            initalised = true;
-        } catch (Exception e) {
-            System.out.println("Failed to Initialise Discord Presence.");
-            return false;
-        }
-
-        new Thread(() -> {
-            while (core != null && core.isOpen()) {
-                core.runCallbacks();
-                try { Thread.sleep(16); }
-                catch (Exception e) { e.printStackTrace(); }
+    public static DiscordPresence getInstance() {
+        DiscordPresence discordPresence = instance;
+        if (discordPresence != null) return discordPresence;
+        synchronized (DiscordPresence.class) {
+            if (instance == null) {
+                instance = new DiscordPresence();
             }
-            System.out.println("Core has closed. Core: " + core);
-        }, "IslandUtils - Discord Callbacks").start();
-        return true;
+            return instance;
+        }
     }
 
-    public static void clear() {
-        if (core == null) return;
-        if (!core.isOpen()) return;
-
-        try { core.close(); }
-        catch (Exception e) { e.printStackTrace(); }
-
-        initalised = false;
-        core = null;
+    public void closeCore() {
+        try {
+            core.close();
+            logger.info("Core has closed. Core: {}", core);
+        }
+        catch (Exception e) {
+            logger.error("{}", "Could not close discord core", e);
+        }
     }
 
+    public Core getCoreInstance() {
+        if (!core.isOpen()) {
+            try (CreateParams params = new CreateParams()) {
+                params.setClientID(1027930697417101344L);
+                params.setFlags(CreateParams.Flags.NO_REQUIRE_DISCORD);
+                Core core = new Core(params);
+                this.core = core;
+                new Thread(() -> {
+                    while (core.isOpen()) {
+                        core.runCallbacks();
+                        try {
+                            // We can't do anything about busy waiting
+                            // Because the library we're using does not offer polls or futures
+                            // noinspection BusyWait
+                            Thread.sleep(16);
+                        }
+                        catch (Exception e) {
+                            logger.error("{}", "Could not sleep discord thread", e);
+                            break;
+                        }
+                    }
+                }, "IslandUtils - Discord Callbacks").start();
+            }
+        }
+        return core;
+    }
 }

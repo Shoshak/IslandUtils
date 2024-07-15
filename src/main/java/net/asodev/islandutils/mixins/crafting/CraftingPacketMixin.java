@@ -1,6 +1,5 @@
 package net.asodev.islandutils.mixins.crafting;
 
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.modules.crafting.CraftingMenuType;
 import net.asodev.islandutils.modules.crafting.CraftingUI;
 import net.minecraft.client.Minecraft;

@@ -1,7 +1,6 @@
 package net.asodev.islandutils.modules.plobby;
 
 import net.asodev.islandutils.IslandUtilsClient;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.util.Sidebar;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.network.chat.Component;

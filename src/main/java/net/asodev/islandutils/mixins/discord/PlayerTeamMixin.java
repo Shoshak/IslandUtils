@@ -1,6 +1,6 @@
 package net.asodev.islandutils.mixins.discord;
 
-import net.asodev.islandutils.discord.DiscordPresenceUpdator;
+import net.asodev.islandutils.discord.DiscordPresenceUpdater;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.scores.PlayerTeam;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,8 +32,8 @@ public class PlayerTeamMixin {
             String value = matcher.group(1);
 
             switch (entry.getKey()) {
-                case "REMAIN" -> DiscordPresenceUpdator.remainScoreboardUpdate(value, true);
-                case "ROUND" -> DiscordPresenceUpdator.roundScoreboardUpdate(value, true);
+                case "REMAIN" -> DiscordPresenceUpdater.remainScoreboardUpdate(value, true);
+                case "ROUND" -> DiscordPresenceUpdater.roundScoreboardUpdate(value, true);
             }
         }
     }

@@ -1,7 +1,5 @@
 package net.asodev.islandutils.mixins.ui;
 
-import net.asodev.islandutils.state.Game;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;

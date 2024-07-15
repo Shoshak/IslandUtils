@@ -4,7 +4,6 @@ import net.asodev.islandutils.mixins.accessors.WalkAnimStateAccessor;
 import net.asodev.islandutils.modules.cosmetics.CosmeticUI;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.categories.CosmeticsOptions;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.modules.cosmetics.CosmeticState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

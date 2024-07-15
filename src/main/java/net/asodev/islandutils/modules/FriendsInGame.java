@@ -3,8 +3,6 @@ package net.asodev.islandutils.modules;
 import net.asodev.islandutils.IslandUtilsEvents;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.categories.MiscOptions;
-import net.asodev.islandutils.state.Game;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.Scheduler;
 import net.minecraft.ChatFormatting;

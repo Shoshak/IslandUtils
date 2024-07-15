@@ -2,15 +2,13 @@ package net.asodev.islandutils;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.asodev.islandutils.discord.DiscordPresenceUpdator;
+import net.asodev.islandutils.discord.DiscordPresenceUpdater;
 import net.asodev.islandutils.modules.DisguiseKeybind;
 import net.asodev.islandutils.modules.NoxesiumIntegration;
 import net.asodev.islandutils.modules.plobby.PlobbyFeatures;
 import net.asodev.islandutils.modules.plobby.PlobbyJoinCodeCopy;
 import net.asodev.islandutils.modules.splits.SplitManager;
 import net.asodev.islandutils.modules.splits.ui.SplitUI;
-import net.asodev.islandutils.state.Game;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.IslandUtilsCommand;
 import net.asodev.islandutils.util.MusicUtil;
@@ -48,7 +46,7 @@ public class IslandUtilsClient implements ClientModInitializer {
         DisguiseKeybind.registerDisguiseInput();
         PlobbyFeatures.registerEvents();
         IslandUtilsCommand.register();
-        DiscordPresenceUpdator.init();
+        DiscordPresenceUpdater.getInstance();
         PlobbyJoinCodeCopy.register();
 
         if (Utils.isLunarClient()) {
@@ -71,7 +69,7 @@ public class IslandUtilsClient implements ClientModInitializer {
             ChatUtils.send("&cYou are using a pre-release version of IslandUtils! Expect things to be broken and buggy, and report to #test-feedback!");
         }
 
-        DiscordPresenceUpdator.create(!isProduction);
+        DiscordPresenceUpdater.create(!isProduction);
         MccIslandState.setGame(Game.HUB);
         IslandUtilsEvents.JOIN_MCCI.invoker().onEvent();
     }

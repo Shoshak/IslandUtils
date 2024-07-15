@@ -7,8 +7,6 @@ import net.asodev.islandutils.mixins.accessors.SoundManagerAccessor;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.IslandSoundCategories;
 import net.asodev.islandutils.options.categories.MusicOptions;
-import net.asodev.islandutils.state.MccIslandState;
-import net.asodev.islandutils.state.Game;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;

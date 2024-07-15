@@ -1,82 +1,63 @@
 package net.asodev.islandutils.discord;
 
+import net.asodev.islandutils.IslandConstants;
 import net.asodev.islandutils.util.resourcepack.ResourcePackOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Optional;
 
 import static net.asodev.islandutils.util.Utils.assertIslandFolder;
 
 public class NativeLibrary {
+    private final Logger logger = LoggerFactory.getLogger(NativeLibrary.class);
 
-    public static String os = System.getProperty("os.name").toLowerCase();
-    public static String architecture = System.getProperty("os.arch").toLowerCase();
+    private final String os = System.getProperty("os.name").toLowerCase();;
+    private final String architecture = System
+            .getProperty("os.arch")
+            .toLowerCase()
+            .replaceAll("amd64", "x86_64");
+    private final String extension;
 
-    public static File grabDiscordNative() throws Exception {
-        String name = "discord_game_sdk";
-        String extention;
-
-        if (os.contains("windows")) extention = ".dll";
-        else if (os.contains("linux")) extention = ".so";
-        else if (os.contains("mac os")) extention = ".dylib";
-        else { throw new RuntimeException("Can't get OS type: " + os + ". Discord Presence Disabled."); }
-
-        if (architecture.equals("amd64")) architecture = "x86_64";
-
-        String libIndex = "native/lib/" + architecture + "/" + name+extention;
-
+    public NativeLibrary() {
+        if (os.contains("windows")) this.extension = ".dll";
+        else if (os.contains("linux")) this.extension = ".so";
+        else if (os.contains("mac")) this.extension = ".dylib";
+        else throw new IllegalArgumentException("Unknown os");
         assertIslandFolder();
-        File outFile = ResourcePackOptions.islandFolder.resolve(libIndex).toFile();
-        if (!outFile.exists()) {
-            System.out.println("Extracting Discord Natives.");
-            InputStream stream = NativeLibrary.class.getResourceAsStream("/" + libIndex);
-            if (stream == null) throw new IOException("Natives couldn't be found in the resources. (" + libIndex + ")");
-
-            outFile.mkdirs();
-            Files.copy(stream, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        return outFile;
     }
 
-    public static File grabDiscordJNI() throws IOException {
+    public File getDiscordNative() throws Exception {
+        String name = "discord_game_sdk";
+        String libIndex = "native/lib/" + architecture + "/" + name+extension;
+        return getNatives(libIndex);
+    }
+
+    public File getDiscordJNI() throws Exception {
         String name = "discord_game_sdk_jni";
-        String osName = os;
+        String libIndex = "native/"+os+"/"+architecture+"/"+name+extension;
+        return getNatives(libIndex);
+    }
 
-        String fileName;
-
-        if(osName.contains("windows")) {
-            osName = "windows";
-            fileName = name + ".dll";
-        }
-        else if(osName.contains("linux")) {
-            osName = "linux";
-            fileName = "lib" + name + ".so";
-        }
-        else if(osName.contains("mac os")) {
-            osName = "macos";
-            fileName = "lib" + name + ".dylib";
-        }
-        else {
-            throw new RuntimeException("cannot determine OS type: "+osName);
-        }
-
-        if(architecture.equals("x86_64"))
-            architecture = "amd64";
-
-        String libIndex = "native/"+osName+"/"+architecture+"/"+fileName;
-
-        File outFile = ResourcePackOptions.islandFolder.resolve(libIndex).toFile();
+    private File getNatives(String libIndex) throws Exception {
+        File outFile = IslandConstants.islandFolder.resolve(libIndex).toFile();
         if (!outFile.exists()) {
+            logger.info("Extracting Discord Natives.");
             InputStream stream = NativeLibrary.class.getResourceAsStream("/" + libIndex);
-            if (stream == null) throw new IOException("JNI couldn't be found in the resources. (" + libIndex + ")");
+            if (stream == null)
+                throw new FileNotFoundException(String.format("Natives couldn't be found in the resources. (%s)", libIndex));
 
-            outFile.mkdirs();
+            boolean mkdirResult = outFile.mkdirs();
+            if (!mkdirResult) throw new Exception("Some of the directories were not created");
             Files.copy(stream, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
+
         return outFile;
     }
 

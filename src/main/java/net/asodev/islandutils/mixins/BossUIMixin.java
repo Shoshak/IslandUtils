@@ -1,7 +1,6 @@
 package net.asodev.islandutils.mixins;
 
 import net.asodev.islandutils.modules.splits.ui.SplitUI;
-import net.asodev.islandutils.state.MccIslandState;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.gui.components.LerpingBossEvent;

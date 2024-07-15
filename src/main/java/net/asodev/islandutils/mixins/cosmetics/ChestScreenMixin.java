@@ -3,7 +3,6 @@ package net.asodev.islandutils.mixins.cosmetics;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.modules.cosmetics.CosmeticType;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.modules.cosmetics.Cosmetic;
 import net.asodev.islandutils.modules.cosmetics.CosmeticSlot;
 import net.asodev.islandutils.modules.cosmetics.CosmeticState;

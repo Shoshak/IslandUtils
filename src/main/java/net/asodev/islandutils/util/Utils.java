@@ -1,5 +1,6 @@
 package net.asodev.islandutils.util;
 
+import net.asodev.islandutils.IslandConstants;
 import net.asodev.islandutils.util.resourcepack.ResourcePackOptions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -62,7 +63,7 @@ public class Utils {
     }
 
     public static void assertIslandFolder() {
-        File folder = ResourcePackOptions.islandFolder.toFile();
+        File folder = IslandConstants.islandFolder.toFile();
         if (!folder.exists()) folder.mkdir();
     }
 

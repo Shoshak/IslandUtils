@@ -1,8 +1,6 @@
 package net.asodev.islandutils.mixins.splits;
 
 import net.asodev.islandutils.modules.splits.SplitManager;
-import net.asodev.islandutils.state.Game;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.TimeUtil;
 import net.minecraft.ChatFormatting;

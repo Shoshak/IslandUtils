@@ -5,7 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.asodev.islandutils.IslandUtilsEvents;
-import net.asodev.islandutils.state.Game;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.Utils;
 import org.slf4j.Logger;

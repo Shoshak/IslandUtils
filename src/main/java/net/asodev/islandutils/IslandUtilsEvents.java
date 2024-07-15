@@ -1,7 +1,6 @@
 package net.asodev.islandutils;
 
 import com.noxcrew.noxesium.network.clientbound.ClientboundMccGameStatePacket;
-import net.asodev.islandutils.state.Game;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.network.chat.Component;

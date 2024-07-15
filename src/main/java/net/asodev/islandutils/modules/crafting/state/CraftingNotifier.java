@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.categories.CraftingOptions;
-import net.asodev.islandutils.state.MccIslandState;
 import net.asodev.islandutils.modules.crafting.CraftingToast;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.MusicUtil;

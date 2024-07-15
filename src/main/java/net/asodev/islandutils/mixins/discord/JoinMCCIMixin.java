@@ -17,6 +17,10 @@ import static net.asodev.islandutils.util.Utils.isProdMCCI;
 @Mixin(ClientHandshakePacketListenerImpl.class)
 public class JoinMCCIMixin {
 
+    public JoinMCCIMixin(String test) {
+
+    }
+
     @Shadow @Final private @Nullable ServerData serverData;
 
     @Inject(method = "handleGameProfile", at = @At("HEAD"))

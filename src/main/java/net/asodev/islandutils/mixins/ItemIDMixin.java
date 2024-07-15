@@ -3,7 +3,6 @@ package net.asodev.islandutils.mixins;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.asodev.islandutils.mixins.accessors.ContainerScreenAccessor;
 import net.asodev.islandutils.options.IslandOptions;
-import net.asodev.islandutils.state.MccIslandState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
