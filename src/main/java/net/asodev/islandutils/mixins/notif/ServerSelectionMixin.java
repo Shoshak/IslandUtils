@@ -1,6 +1,6 @@
 package net.asodev.islandutils.mixins.notif;
 
-import net.asodev.islandutils.state.MccIslandNotifs;
+import net.asodev.islandutils.state.MccIslandNotifications;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -22,8 +22,12 @@ import java.util.Optional;
 
 @Mixin(ServerSelectionList.OnlineServerEntry.class)
 public class ServerSelectionMixin {
-    @Shadow @Final private JoinMultiplayerScreen screen;
-    @Shadow @Final private ServerData serverData;
+    @Shadow
+    @Final
+    private JoinMultiplayerScreen screen;
+    @Shadow
+    @Final
+    private ServerData serverData;
     private static ResourceLocation NOTIF_TEXTURE = new ResourceLocation("textures/gui/sprites/icon/unseen_notification.png");
     private static Component NOTIF_TITLE = Component.literal("Notifications").withStyle(Style.EMPTY.withUnderlined(true));
 
@@ -37,7 +41,7 @@ public class ServerSelectionMixin {
     )
     private void render(GuiGraphics guiGraphics, int index, int y, int x, int ew, int eh, int mouseX, int mouseY, boolean hovered, float d, CallbackInfo ci) {
         if (!this.serverData.ip.toLowerCase().contains("mccisland.net")) return;
-        List<Component> notifs = MccIslandNotifs.getNotifLines();
+        List<Component> notifs = MccIslandNotifications.getNotificationLines();
         if (notifs.isEmpty()) return;
 
         List<Component> tooltip = new ArrayList<>();
