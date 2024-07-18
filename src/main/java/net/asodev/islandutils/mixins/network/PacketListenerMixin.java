@@ -1,12 +1,7 @@
 package net.asodev.islandutils.mixins.network;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.asodev.islandutils.IslandUtilsClient;
 import net.asodev.islandutils.IslandUtilsEvents;
 import net.asodev.islandutils.discord.DiscordPresenceUpdater;
-import net.asodev.islandutils.modules.FriendsInGame;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.IslandSoundCategories;
 import net.asodev.islandutils.modules.ClassicAnnouncer;
@@ -15,43 +10,24 @@ import net.asodev.islandutils.modules.cosmetics.CosmeticState;
 import net.asodev.islandutils.modules.splits.LevelTimer;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.MusicUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.*;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.Connection;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.PacketUtils;
-import net.minecraft.network.protocol.game.*;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.listener.ClientCommonPacketListener;
+import net.minecraft.network.listener.ClientPacketListener;
+import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static net.asodev.islandutils.modules.FriendsInGame.TRANSACTION_ID;
-
-@Mixin(ClientPacketListener.class)
-public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl {
-
-    // I should really separate these mixins...
-
-    @Shadow private CommandDispatcher<CommandSourceStack> commands;
-
-    protected PacketListenerMixin(Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
-        super(minecraft, connection, commonListenerCookie);
-    }
+@Mixin(ClientPlayNetworkHandler.class)
+public abstract class PacketListenerMixin implements ClientCommonPacketListener {
 
     @Unique private final ClassicAnnouncer announcer = new ClassicAnnouncer(ChatUtils.parseColor("#FFA800"));
 
@@ -63,9 +39,8 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
             "LEAP", Pattern.compile("LEAP \\[(?<leap>.*/.*)]")
     );
 
-
-    @Inject(method = "handleSetPlayerTeamPacket", at = @At("TAIL")) // Scoreboard lines!
-    public void handleSetPlayerTeamPacket(ClientboundSetPlayerTeamPacket clientboundSetPlayerTeamPacket, CallbackInfo ci) {
+    @Inject(method = "onTeam", at = @At("TAIL")) // Scoreboard lines!
+    public void handleSetPlayerTeamPacket(TeamS2CPacket packet, CallbackInfo ci) {
         if (!MccIslandState.isOnline()) return;
         Optional<ClientboundSetPlayerTeamPacket.Parameters> optional = clientboundSetPlayerTeamPacket.getParameters();
         if (optional.isEmpty()) return;
@@ -95,8 +70,8 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
         } catch (Exception ignored) {}
     }
 
-    @Inject(method = "handleSoundEvent", at = @At("HEAD"), cancellable = true)
-    public void handleCustomSoundEvent(ClientboundSoundPacket clientboundCustomSoundPacket, CallbackInfo ci) {
+    @Inject(method = "onPlaySound", at = @At("HEAD"), cancellable = true)
+    public void handleCustomSoundEvent(PlaySoundS2CPacket packet, CallbackInfo ci) {
         PacketUtils.ensureRunningOnSameThread(clientboundCustomSoundPacket, (ClientPacketListener) (Object) this, this.minecraft);
         if (!MccIslandState.isOnline()) return;
 
@@ -151,8 +126,8 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
         }
     }
 
-    @Inject(method = "handleContainerContent", at = @At("TAIL")) // Cosmetic previews, whenever we get our cosmetics back after closing menu
-    private void containerContent(ClientboundContainerSetContentPacket clientboundContainerSetContentPacket, CallbackInfo ci) {
+    @Inject(method = "onInventory", at = @At("TAIL")) // Cosmetic previews, whenever we get our cosmetics back after closing menu
+    private void containerContent(InventoryS2CPacket packet, CallbackInfo ci) {
         if (!MccIslandState.isOnline()) return;
         Player player = Minecraft.getInstance().player;
         if (player == null) return; // If no player, stop
@@ -162,8 +137,8 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
         CosmeticState.accessorySlot.setOriginal(new CosmeticSlot(player.getInventory().offhand.get(0)));
     }
 
-    @Inject(method = "handleRespawn", at = @At("HEAD")) // Whenever we change worlds
-    private void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo ci) {
+    @Inject(method = "onPlayerRespawn", at = @At("HEAD")) // Whenever we change worlds
+    private void handleRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci) {
         ClientLevel clientLevel = this.minecraft.level; // Get our player
         if (clientLevel == null) return; // minecraft is a good game.
 
@@ -174,56 +149,48 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
     }
 
     private static Pattern timerPattern = Pattern.compile("(\\d+:\\d+)");
-    @Inject(method = "handleBossUpdate", at = @At("HEAD")) // Discord presence, time left
-    private void handleBossUpdate(ClientboundBossEventPacket clientboundBossEventPacket, CallbackInfo ci) {
+    @Inject(method = "onBossBar", at = @At("HEAD")) // Discord presence, time left
+    private void handleBossUpdate(BossBarS2CPacket packet, CallbackInfo ci) {
         if (!MccIslandState.isOnline()) return;
         // Create a handler for the bossbar
-        ClientboundBossEventPacket.Handler bossbarHandler = new ClientboundBossEventPacket.Handler(){
+        packet.accept(new BossBarS2CPacket.Consumer() {
             @Override
-            public void updateName(UUID uUID, Component component) {
-                if (!component.getString().contains(":")) return; // If we don't have a timer, move on with our lives
-                try {
-                    String text = component.getString();
-                    Matcher matcher = timerPattern.matcher(text);
-                    if (!matcher.find()) return;
-                    String timer = matcher.group(1);
-                    String[] split = timer.split(":"); // Split by the timer
-                    String minsText = split[0]; // Get the left side
-                    String secsText = split[1]; // Get the right side
+            public void updateName(UUID uuid, Text name) {
+                String text = component.getString();
+                Matcher matcher = timerPattern.matcher(text);
+                if (!matcher.find()) return;
+                String timer = matcher.group(1);
+                String[] split = timer.split(":"); // Split by the timer
+                String minsText = split[0]; // Get the left side
+                String secsText = split[1]; // Get the right side
 
-                    int mins = Integer.parseInt( minsText.substring( Math.max(minsText.length() - 2, 0)) ); // Get the last 2 character of the left side
-                    int secs = Integer.parseInt( secsText.substring(0, 2) ); // Get the first 2 on the right side
+                int mins = Integer.parseInt( minsText.substring( Math.max(minsText.length() - 2, 0)) ); // Get the last 2 character of the left side
+                int secs = Integer.parseInt( secsText.substring(0, 2) ); // Get the first 2 on the right side
 
-                    long secondsLeft = ((mins * 60L) + secs+1);
-                    long finalUnix = System.currentTimeMillis() + (secondsLeft * 1000); // Get the timestamp when the game will end
+                long secondsLeft = ((mins * 60L) + secs+1);
+                long finalUnix = System.currentTimeMillis() + (secondsLeft * 1000); // Get the timestamp when the game will end
 
-                    DiscordPresenceUpdater.timeLeftBossbar = uUID; // why do i do this again?
-                    DiscordPresenceUpdater.updateTimeLeft(finalUnix); // Update our time left!!
-                } catch (Exception ignored) {}
+                DiscordPresenceUpdater.timeLeftBossbar = uUID; // why do i do this again?
+                DiscordPresenceUpdater.updateTimeLeft(finalUnix); // Update our time left!!
+                BossBarS2CPacket.Consumer.super.updateName(uuid, name);
             }
-            @Override
-            public void remove(UUID uUID) { // tbf, i don't this is ever called, but y'know, just to be sure
-                if (DiscordPresenceUpdater.timeLeftBossbar == uUID)
-                    DiscordPresenceUpdater.updateTimeLeft(null);
-            }
-        };
-        clientboundBossEventPacket.dispatch(bossbarHandler); // Execute the handler!
+        });
     }
 
-    @Inject(method = "handleCommandSuggestions", cancellable = true, at = @At("HEAD")) // "Friends in this game: "
-    private void commandSuggestionsResponse(ClientboundCommandSuggestionsPacket clientboundCommandSuggestionsPacket, CallbackInfo ci) {
-        if (clientboundCommandSuggestionsPacket.id() == TRANSACTION_ID) { // If we get back suggestions from our previous request
-            ci.cancel(); // Stop minecraft... please.
-            List<String> friends = clientboundCommandSuggestionsPacket // our friends suggestions
-                    .suggestions() // the suggestions
-                    .stream().map(ClientboundCommandSuggestionsPacket.Entry::text) // the text of the suggestions
-                    .collect(Collectors.toList()); // a list of the suggestions
-            FriendsInGame.setFriends(friends); // Set our friends!
-        }
-    }
+//    @Inject(method = "handleCommandSuggestions", cancellable = true, at = @At("HEAD")) // "Friends in this game: "
+//    private void commandSuggestionsResponse(ClientboundCommandSuggestionsPacket clientboundCommandSuggestionsPacket, CallbackInfo ci) {
+//        if (clientboundCommandSuggestionsPacket.id() == TRANSACTION_ID) { // If we get back suggestions from our previous request
+//            ci.cancel(); // Stop minecraft... please.
+//            List<String> friends = clientboundCommandSuggestionsPacket // our friends suggestions
+//                    .suggestions() // the suggestions
+//                    .stream().map(ClientboundCommandSuggestionsPacket.Entry::text) // the text of the suggestions
+//                    .collect(Collectors.toList()); // a list of the suggestions
+//            FriendsInGame.setFriends(friends); // Set our friends!
+//        }
+//    }
 
-    @Inject(method = "setSubtitleText", at = @At("HEAD"), cancellable = true)
-    private void titleText(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket, CallbackInfo ci) {
+    @Inject(method = "onSubtitle", at = @At("HEAD"), cancellable = true)
+    private void titleText(SubtitleS2CPacket packet, CallbackInfo ci) {
         if (MccIslandState.getGame() == Game.HITW) {
             announcer.handleTrap(clientboundSetSubtitleTextPacket, ci);
         } else if (MccIslandState.getGame() == Game.PARKOUR_WARRIOR_DOJO) {
@@ -233,8 +200,8 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
         }
     }
 
-    @Inject(method = "setTitleText", at = @At("HEAD")) // Game Over Sound Effect
-    private void gameOver(ClientboundSetTitleTextPacket clientboundSetTitleTextPacket, CallbackInfo ci) {
+    @Inject(method = "onTitle", at = @At("HEAD")) // Game Over Sound Effect
+    private void gameOver(TitleS2CPacket packet, CallbackInfo ci) {
         if (MccIslandState.getGame() != Game.HITW) return; // Make sure we're playing HITW
         if (!IslandOptions.getClassicHITW().isClassicHITW()) return; // Requires isClassicHITW
         String title = clientboundSetTitleTextPacket.text().getString().toUpperCase(); // Get the title in upper case
@@ -245,8 +212,8 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
         }
     }
 
-    @Inject(method = "handleSystemChat", at = @At("HEAD"), cancellable = true)
-    private void onChat(ClientboundSystemChatPacket clientboundSystemChatPacket, CallbackInfo ci) {
+    @Inject(method = "onChatMessage", at = @At("HEAD"), cancellable = true)
+    private void onChat(ChatMessageS2CPacket packet, CallbackInfo ci) {
         if (clientboundSystemChatPacket.overlay() || !MccIslandState.isOnline()) return;
 
         IslandUtilsEvents.Modifier<Component> modifier = new IslandUtilsEvents.Modifier<>();
@@ -259,33 +226,33 @@ public abstract class PacketListenerMixin extends ClientCommonPacketListenerImpl
         });
     }
 
-    // MCCI Commands
-    @Inject(method = "handleCommands", at = @At("TAIL"))
-    private void handleCommands(ClientboundCommandsPacket clientboundCommandsPacket, CallbackInfo ci) {
-        if (!MccIslandState.isOnline()) return;
-        this.commands.register((LiteralArgumentBuilder<CommandSourceStack>)IslandUtilsClient.Commands.resetMusic);
-    }
-
-    @Inject(method = "sendUnsignedCommand", at = @At("HEAD"), cancellable = true)
-    private void sendUnsignedCommand(String string, CallbackInfoReturnable<Boolean> cir) {
-        if (!MccIslandState.isOnline()) return;
-        if (string.startsWith("resetmusic")) {
-            executeCommand();
-            cir.setReturnValue(true);
-        }
-    }
-    @Inject(method = "sendCommand", at = @At("HEAD"), cancellable = true)
-    private void sendCommand(String string, CallbackInfo ci) {
-        if (!MccIslandState.isOnline()) return;
-        if (string.startsWith("resetmusic")) {
-            executeCommand();
-            ci.cancel();
-        }
-    }
-
-    private static void executeCommand() {
-        try { IslandUtilsClient.Commands.resetMusic.getCommand().run(null); }
-        catch (CommandSyntaxException e) { e.printStackTrace(); }
-    }
+//    // MCCI Commands
+//    @Inject(method = "", at = @At("TAIL"))
+//    private void handleCommands(ClientboundCommandsPacket clientboundCommandsPacket, CallbackInfo ci) {
+//        if (!MccIslandState.isOnline()) return;
+//        this.commands.register((LiteralArgumentBuilder<CommandSourceStack>)IslandUtilsClient.Commands.resetMusic);
+//    }
+//
+//    @Inject(method = "sendUnsignedCommand", at = @At("HEAD"), cancellable = true)
+//    private void sendUnsignedCommand(String string, CallbackInfoReturnable<Boolean> cir) {
+//        if (!MccIslandState.isOnline()) return;
+//        if (string.startsWith("resetmusic")) {
+//            executeCommand();
+//            cir.setReturnValue(true);
+//        }
+//    }
+//    @Inject(method = "sendCommand", at = @At("HEAD"), cancellable = true)
+//    private void sendCommand(String string, CallbackInfo ci) {
+//        if (!MccIslandState.isOnline()) return;
+//        if (string.startsWith("resetmusic")) {
+//            executeCommand();
+//            ci.cancel();
+//        }
+//    }
+//
+//    private static void executeCommand() {
+//        try { IslandUtilsClient.Commands.resetMusic.getCommand().run(null); }
+//        catch (CommandSyntaxException e) { e.printStackTrace(); }
+//    }
 
 }

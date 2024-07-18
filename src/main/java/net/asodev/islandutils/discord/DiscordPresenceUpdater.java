@@ -6,6 +6,7 @@ import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.categories.DiscordOptions;
 import net.asodev.islandutils.state.IslandState;
 import net.asodev.islandutils.state.IslandStateHolder;
+import net.asodev.islandutils.state.StateChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +26,12 @@ public class DiscordPresenceUpdater {
     private UUID timeLeftBossBar;
     private Instant started;
 
+
     public DiscordPresenceUpdater(IslandStateHolder stateHolder) {
         if (!IslandOptions.getDiscord().discordPresence) return;
         this.started = Instant.now();
 
-        IslandUtilsEvents.GAME_UPDATE.register(game -> {
-            updateActivity(stateHolder.getState());
-        });
+        StateChangeEvent.EVENT.register(this::updateActivity);
     }
 
     public void updateTimeLeft(Long endTimestamp) {
