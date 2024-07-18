@@ -1,7 +1,6 @@
 package net.asodev.islandutils.mixins.cosmetics;
 
 import net.asodev.islandutils.modules.cosmetics.CosmeticState;
-import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.util.ChatUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
@@ -39,7 +38,7 @@ public class PreviewTutorialMixin {
             locals = LocalCapture.CAPTURE_FAILEXCEPTION
     )
     private void injectedTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag, CallbackInfoReturnable<List<Component>> cir, List<Component> list, MutableComponent mutableComponent, Consumer consumer) {
-        if (CosmeticState.getType((ItemStack)(Object)this) == null) return;
+        if (CosmeticState.getType((ItemStack) (Object) this) == null) return;
         if (!IslandOptions.getCosmetics().isShowPlayerPreview()) return;
         list.add(previewComponent);
     }

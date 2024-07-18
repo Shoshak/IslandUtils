@@ -1,11 +1,10 @@
 package net.asodev.islandutils.mixins.cosmetics;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.asodev.islandutils.options.IslandOptions;
-import net.asodev.islandutils.modules.cosmetics.CosmeticType;
 import net.asodev.islandutils.modules.cosmetics.Cosmetic;
 import net.asodev.islandutils.modules.cosmetics.CosmeticSlot;
 import net.asodev.islandutils.modules.cosmetics.CosmeticState;
+import net.asodev.islandutils.modules.cosmetics.CosmeticType;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -38,11 +37,15 @@ import static net.asodev.islandutils.util.Utils.customModelData;
 public abstract class ChestScreenMixin extends Screen {
     private static final ResourceLocation PREVIEW = new ResourceLocation("island", "textures/preview.png");
 
-    @Shadow protected Slot hoveredSlot;
+    @Shadow
+    protected Slot hoveredSlot;
 
-    @Shadow @Final protected AbstractContainerMenu menu;
+    @Shadow
+    @Final
+    protected AbstractContainerMenu menu;
 
-    @Shadow protected abstract List<Component> getTooltipFromContainerItem(ItemStack itemStack);
+    @Shadow
+    protected abstract List<Component> getTooltipFromContainerItem(ItemStack itemStack);
 
     protected ChestScreenMixin(Component component) {
         super(component);
@@ -75,13 +78,15 @@ public abstract class ChestScreenMixin extends Screen {
 
         boolean shouldRender = false;
 
-        if (CosmeticState.hatSlot.preview != null && CosmeticState.hatSlot.preview.matchesSlot(slot)) shouldRender = true;
-        else if (CosmeticState.accessorySlot.preview != null && CosmeticState.accessorySlot.preview.matchesSlot(slot)) shouldRender = true;
+        if (CosmeticState.hatSlot.preview != null && CosmeticState.hatSlot.preview.matchesSlot(slot))
+            shouldRender = true;
+        else if (CosmeticState.accessorySlot.preview != null && CosmeticState.accessorySlot.preview.matchesSlot(slot))
+            shouldRender = true;
 
         guiGraphics.pose().pushPose();
         if (shouldRender) {
             guiGraphics.pose().translate(0.0f, 0.0f, 105f);
-            guiGraphics.blit(PREVIEW, slot.x-3, slot.y-4, 105, 0, 0, 22, 24, 22, 24);
+            guiGraphics.blit(PREVIEW, slot.x - 3, slot.y - 4, 105, 0, 0, 22, 24, 22, 24);
         }
         guiGraphics.pose().popPose();
     }
@@ -131,6 +136,7 @@ public abstract class ChestScreenMixin extends Screen {
     private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         triggerPreviewClicked(keyCode);
     }
+
     @Inject(method = "mouseReleased", at = @At("HEAD"))
     private void mouseReleased(double d, double e, int keyCode, CallbackInfoReturnable<Boolean> cir) {
         triggerPreviewClicked(keyCode);

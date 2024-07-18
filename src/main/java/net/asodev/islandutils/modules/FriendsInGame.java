@@ -1,8 +1,6 @@
 package net.asodev.islandutils.modules;
 
 import net.asodev.islandutils.IslandUtilsEvents;
-import net.asodev.islandutils.options.IslandOptions;
-import net.asodev.islandutils.options.categories.MiscOptions;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.Scheduler;
 import net.minecraft.ChatFormatting;
@@ -50,7 +48,7 @@ public class FriendsInGame {
             }
         }
         if (!hasFriends) return;
-        String friendString = friendsInThisGame.toString().replaceFirst(", ","");
+        String friendString = friendsInThisGame.toString().replaceFirst(", ", "");
 
         String text = "Friends in this game";
         if (MccIslandState.getGame() == Game.HUB) text = "Friends in this lobby";

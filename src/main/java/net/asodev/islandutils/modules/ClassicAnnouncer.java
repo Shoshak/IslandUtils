@@ -1,6 +1,5 @@
 package net.asodev.islandutils.modules;
 
-import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.util.MusicUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -48,7 +47,7 @@ public class ClassicAnnouncer {
         if ((timestamp - lastTrapTimestamp) < 50) return; // 50ms delay
         lastTrapTimestamp = timestamp;
 
-        trapName = trapName.replaceAll("([ \\-!])","").toLowerCase();
+        trapName = trapName.replaceAll("([ \\-!])", "").toLowerCase();
         ResourceLocation soundLocation = new ResourceLocation("island", "announcer." + trapName);
         Minecraft.getInstance().getSoundManager().play(MusicUtil.createSoundInstance(soundLocation));
     }

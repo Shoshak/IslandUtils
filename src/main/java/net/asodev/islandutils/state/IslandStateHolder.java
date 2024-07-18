@@ -2,7 +2,7 @@ package net.asodev.islandutils.state;
 
 import com.noxcrew.noxesium.network.NoxesiumPackets;
 import com.noxcrew.noxesium.network.clientbound.ClientboundMccServerPacket;
-import net.minecraft.util.ActionResult;
+import net.asodev.islandutils.events.StateChangeEvent;
 
 public class IslandStateHolder {
     public IslandStateHolder() {

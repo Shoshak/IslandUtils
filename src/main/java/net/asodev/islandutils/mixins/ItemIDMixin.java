@@ -2,7 +2,6 @@ package net.asodev.islandutils.mixins;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.asodev.islandutils.mixins.accessors.ContainerScreenAccessor;
-import net.asodev.islandutils.options.IslandOptions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -42,7 +41,8 @@ public abstract class ItemIDMixin implements DataComponentHolder {
     )
     private void addTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag, CallbackInfoReturnable<List<Component>> cir, List list) {
         if (!MccIslandState.isOnline() || !IslandOptions.getMisc().isDebugMode()) return;
-        if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_LCONTROL)) return;
+        if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_LCONTROL))
+            return;
 
         MutableComponent toAppend = Component.empty();
         if (this.has(DataComponents.CUSTOM_DATA)) tryAddCustomItemID(toAppend); // Append MCCI Custom Item ID
@@ -66,7 +66,7 @@ public abstract class ItemIDMixin implements DataComponentHolder {
 
     @Unique
     private void tryAddSlotNumber(MutableComponent toAppend) {
-        ItemStack me = (ItemStack)(Object)this;
+        ItemStack me = (ItemStack) (Object) this;
         Screen screen = Minecraft.getInstance().screen;
         if (!(screen instanceof AbstractContainerScreen<?> containerScreen)) return;
         Slot hoveredSlot = ((ContainerScreenAccessor) containerScreen).getHoveredSlot();

@@ -2,12 +2,11 @@ package net.asodev.islandutils.mixins.network;
 
 import net.asodev.islandutils.IslandUtilsEvents;
 import net.asodev.islandutils.discord.DiscordPresenceUpdater;
-import net.asodev.islandutils.options.IslandOptions;
-import net.asodev.islandutils.options.IslandSoundCategories;
 import net.asodev.islandutils.modules.ClassicAnnouncer;
 import net.asodev.islandutils.modules.cosmetics.CosmeticSlot;
 import net.asodev.islandutils.modules.cosmetics.CosmeticState;
 import net.asodev.islandutils.modules.splits.LevelTimer;
+import net.asodev.islandutils.options.IslandSoundCategories;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.MusicUtil;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -16,20 +15,23 @@ import net.minecraft.network.listener.ClientPacketListener;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class PacketListenerMixin implements ClientCommonPacketListener {
 
-    @Unique private final ClassicAnnouncer announcer = new ClassicAnnouncer(ChatUtils.parseColor("#FFA800"));
+    @Unique
+    private final ClassicAnnouncer announcer = new ClassicAnnouncer(ChatUtils.parseColor("#FFA800"));
 
     // Patterns for the Map & Modifier options on scoreboard
     final Map<String, Pattern> scoreboardPatterns = Map.of(
@@ -67,7 +69,8 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
 
                 ChatUtils.debug("ScoreboardUpdate - Current %s: \"%s\"", entry.getKey(), value);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     @Inject(method = "onPlaySound", at = @At("HEAD"), cancellable = true)
@@ -89,7 +92,7 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
             if (MccIslandState.getGame() != Game.BATTLE_BOX) {
 
                 // Stop the music if you restart the course or switch game mode in Parkour Warrior
-                if(soundLoc.getPath().contains("games.parkour_warrior.mode_swap") || soundLoc.getPath().contains("games.parkour_warrior.restart_course")) {
+                if (soundLoc.getPath().contains("games.parkour_warrior.mode_swap") || soundLoc.getPath().contains("games.parkour_warrior.restart_course")) {
                     MusicUtil.stopMusic(false);
                 }
                 if (MccIslandState.getGame() == Game.PARKOUR_WARRIOR_SURVIVOR && Objects.equals(soundLoc.getPath(), "games.global.early_elimination")) {
@@ -126,7 +129,8 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
         }
     }
 
-    @Inject(method = "onInventory", at = @At("TAIL")) // Cosmetic previews, whenever we get our cosmetics back after closing menu
+    @Inject(method = "onInventory", at = @At("TAIL"))
+    // Cosmetic previews, whenever we get our cosmetics back after closing menu
     private void containerContent(InventoryS2CPacket packet, CallbackInfo ci) {
         if (!MccIslandState.isOnline()) return;
         Player player = Minecraft.getInstance().player;
@@ -149,6 +153,7 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
     }
 
     private static Pattern timerPattern = Pattern.compile("(\\d+:\\d+)");
+
     @Inject(method = "onBossBar", at = @At("HEAD")) // Discord presence, time left
     private void handleBossUpdate(BossBarS2CPacket packet, CallbackInfo ci) {
         if (!MccIslandState.isOnline()) return;
@@ -164,10 +169,10 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
                 String minsText = split[0]; // Get the left side
                 String secsText = split[1]; // Get the right side
 
-                int mins = Integer.parseInt( minsText.substring( Math.max(minsText.length() - 2, 0)) ); // Get the last 2 character of the left side
-                int secs = Integer.parseInt( secsText.substring(0, 2) ); // Get the first 2 on the right side
+                int mins = Integer.parseInt(minsText.substring(Math.max(minsText.length() - 2, 0))); // Get the last 2 character of the left side
+                int secs = Integer.parseInt(secsText.substring(0, 2)); // Get the first 2 on the right side
 
-                long secondsLeft = ((mins * 60L) + secs+1);
+                long secondsLeft = ((mins * 60L) + secs + 1);
                 long finalUnix = System.currentTimeMillis() + (secondsLeft * 1000); // Get the timestamp when the game will end
 
                 DiscordPresenceUpdater.timeLeftBossbar = uUID; // why do i do this again?

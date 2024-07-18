@@ -3,7 +3,6 @@ package net.asodev.islandutils.modules.splits;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.util.ChatUtils;
 
 import java.util.*;
@@ -18,6 +17,7 @@ public class LevelSplits {
     public LevelSplits(String name) {
         this.name = name;
     }
+
     public LevelSplits(JsonObject json) {
         name = json.get("name").getAsString();
         JsonElement expiresElement = json.get("expires");
@@ -44,13 +44,14 @@ public class LevelSplits {
         ChatUtils.debug("LevelSplits - Time (" + time + "ms) was saved with uid: " + uid);
         SplitManager.saveAsync();
     }
+
     public Double getSplit(String level) {
         if (!splits.containsKey(level)) return null;
         SplitType type = IslandOptions.getSplits().getSaveMode();
         double value = 0.0;
         switch (type) {
             case BEST -> value = splits.get(level).best();
-            case AVG -> value =  splits.get(level).avg();
+            case AVG -> value = splits.get(level).avg();
         }
         return value / 1000d;
     }
@@ -74,14 +75,16 @@ public class LevelSplits {
     public String getName() {
         return name;
     }
+
     public Long getExpires() {
         return expires;
     }
+
     public void setExpires(Long expires) {
         this.expires = expires;
     }
 
-    public record Split(Long best, Double avg, List<Long> times){
+    public record Split(Long best, Double avg, List<Long> times) {
         public Split addTime(Long time) {
             List<Long> newList = new ArrayList<>(times);
             newList.add(time);
@@ -93,6 +96,7 @@ public class LevelSplits {
         public static Split fromJson(JsonElement json) {
             return new Gson().fromJson(json, Split.class);
         }
+
         public JsonElement toJson() {
             return new Gson().toJsonTree(this);
         }

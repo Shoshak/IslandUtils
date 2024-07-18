@@ -3,8 +3,6 @@ package net.asodev.islandutils.modules.crafting.state;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.asodev.islandutils.options.IslandOptions;
-import net.asodev.islandutils.options.categories.CraftingOptions;
 import net.asodev.islandutils.modules.crafting.CraftingToast;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.MusicUtil;
@@ -30,6 +28,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class CraftingNotifier implements ClientTickEvents.EndTick {
     private int tick = 0;
+
     public CraftingNotifier() {
         ClientTickEvents.END_CLIENT_TICK.register(this);
     }
@@ -54,7 +53,7 @@ public class CraftingNotifier implements ClientTickEvents.EndTick {
         if (!options.isEnableCraftingNotifs()) return;
         boolean shouldMakeSound = false;
         if (options.isToastNotif()) {
-            client.getToasts().addToast( new CraftingToast(item) );
+            client.getToasts().addToast(new CraftingToast(item));
             shouldMakeSound = true;
         }
         if (options.isChatNotif()) {
@@ -130,18 +129,18 @@ public class CraftingNotifier implements ClientTickEvents.EndTick {
     public static LiteralArgumentBuilder<FabricClientCommandSource> getDebugCommand() {
         return literal("add_craft")
                 .then(argument("color", StringArgumentType.string())
-                .then(argument("slot", IntegerArgumentType.integer())
-                .then(argument("delay", IntegerArgumentType.integer())
-                .executes(ctx -> {
-                    if (!IslandOptions.getMisc().isDebugMode()) {
-                        ctx.getSource().sendError(cantUseDebugError);
-                        return 0;
-                    }
-                    String color = ctx.getArgument("color", String.class);
-                    Integer slot = ctx.getArgument("slot", Integer.class);
-                    Integer delay = ctx.getArgument("delay", Integer.class);
-                    CraftingItems.addDebugItem(color, slot, delay);
-                    return 1;
-                }))));
+                        .then(argument("slot", IntegerArgumentType.integer())
+                                .then(argument("delay", IntegerArgumentType.integer())
+                                        .executes(ctx -> {
+                                            if (!IslandOptions.getMisc().isDebugMode()) {
+                                                ctx.getSource().sendError(cantUseDebugError);
+                                                return 0;
+                                            }
+                                            String color = ctx.getArgument("color", String.class);
+                                            Integer slot = ctx.getArgument("slot", Integer.class);
+                                            Integer delay = ctx.getArgument("delay", Integer.class);
+                                            CraftingItems.addDebugItem(color, slot, delay);
+                                            return 1;
+                                        }))));
     }
 }

@@ -1,6 +1,5 @@
 package net.asodev.islandutils.modules.scavenging;
 
-import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.util.Utils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -35,6 +34,7 @@ public class Scavenging {
         if (titleComponent == null) return false;
         return screen.getTitle().contains(titleComponent);
     }
+
     public static void renderSilverTotal(ScavengingTotalList silverTotal, GuiGraphics guiGraphics) {
         Minecraft minecraft = Minecraft.getInstance();
         if (!(minecraft.screen instanceof ContainerScreen screen)) return;
@@ -59,6 +59,7 @@ public class Scavenging {
         applyItemRow(list, container, 29, 33);
         return list;
     }
+
     private static void applyItemRow(ScavengingTotalList list, Container container, int min, int max) {
         for (int i = min; i <= max; i++) {
             ItemStack item = container.getItem(i);
@@ -80,6 +81,7 @@ public class Scavenging {
     public static void setDustCharacter(String dustCharacter) {
         dustHandler = new ScavengingItemHandler("dust", dustCharacter);
     }
+
     public static void setSilverCharacter(String silverCharacter) {
         silverHandler = new ScavengingItemHandler("silver", silverCharacter);
     }

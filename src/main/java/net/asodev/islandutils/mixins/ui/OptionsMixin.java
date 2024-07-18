@@ -1,6 +1,5 @@
 package net.asodev.islandutils.mixins.ui;
 
-import net.asodev.islandutils.options.IslandOptions;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;

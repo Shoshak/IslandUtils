@@ -1,7 +1,5 @@
 package net.asodev.islandutils.modules.splits;
 
-import net.asodev.islandutils.options.IslandOptions;
-import net.asodev.islandutils.options.categories.SplitsCategory;
 import net.asodev.islandutils.modules.splits.ui.DojoSplitUI;
 import net.asodev.islandutils.modules.splits.ui.SplitUI;
 import net.asodev.islandutils.util.ChatUtils;
@@ -68,6 +66,7 @@ public class LevelTimer {
             ChatUtils.debug("Detected level with id: " + levelUid);
         }
     }
+
     public void modifyMedalTitle(ClientboundSetSubtitleTextPacket subtitle, CallbackInfo ci) {
         Component component = subtitle.text();
         MutableComponent component1 = component.copy();
@@ -81,6 +80,7 @@ public class LevelTimer {
         lastSplitTimestamp = System.currentTimeMillis();
         isBetween = true;
     }
+
     public void saveSplit() {
         if (splits != null) {
             sendSplitCompeteMessage();
@@ -89,6 +89,7 @@ public class LevelTimer {
             splits.saveSplit(levelUid, levelName, millis);
         }
     }
+
     public void sendSplitCompeteMessage() {
         if (!options.isSendSplitTime()) return;
         String time = String.format("%.3fs", getCurrentSplitTime());
@@ -103,6 +104,7 @@ public class LevelTimer {
         }
         ChatUtils.send(component);
     }
+
     private Component getSplitImprovementComponent() {
         Double splitImprovement = getSplitImprovement();
         if (splitImprovement == null) splitImprovement = 0d;
@@ -131,9 +133,11 @@ public class LevelTimer {
     public Long getCurrentSplitTimeMilis() {
         return (System.currentTimeMillis() - lastSplitTimestamp);
     }
+
     public double getCurrentSplitTime() {
         return getCurrentSplitTimeMilis() / 1000d;
     }
+
     public Double getSplitImprovement() {
         double currentSplitTime = getCurrentSplitTime();
         if (splits == null) {
@@ -178,9 +182,11 @@ public class LevelTimer {
     public SplitUI getUI() {
         return splitUI;
     }
+
     public String getLevelName() {
         return levelName;
     }
+
     public boolean isBetween() {
         return isBetween;
     }
@@ -191,6 +197,7 @@ public class LevelTimer {
     public static LevelTimer getInstance() {
         return instance;
     }
+
     public static void setInstance(LevelTimer instance) {
         LevelTimer.instance = instance;
     }

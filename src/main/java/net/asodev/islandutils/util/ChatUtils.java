@@ -1,6 +1,5 @@
 package net.asodev.islandutils.util;
 
-import net.asodev.islandutils.options.IslandOptions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -14,8 +13,9 @@ import java.util.Optional;
 
 public class ChatUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger("IslandUtils");
-    public static final Style iconsFontStyle = Style.EMPTY.withColor(ChatFormatting.WHITE).withFont(new ResourceLocation("island","icons"));
+    public static final Style iconsFontStyle = Style.EMPTY.withColor(ChatFormatting.WHITE).withFont(new ResourceLocation("island", "icons"));
     public static final String prefix = "&b[&eIslandUtils&b]";
+
     public static String translate(String s) {
         return s.replaceAll("&", "§");
     }

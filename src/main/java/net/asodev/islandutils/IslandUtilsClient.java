@@ -46,7 +46,7 @@ public class IslandUtilsClient implements ClientModInitializer {
         DisguiseKeybind.registerDisguiseInput();
         PlobbyFeatures.registerEvents();
         IslandUtilsCommand.register();
-        DiscordPresenceUpdater.getInstance();
+        new DiscordPresenceUpdater();
         PlobbyJoinCodeCopy.register();
 
         if (Utils.isLunarClient()) {

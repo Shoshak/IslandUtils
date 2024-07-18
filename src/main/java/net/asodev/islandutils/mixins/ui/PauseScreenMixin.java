@@ -1,6 +1,5 @@
 package net.asodev.islandutils.mixins.ui;
 
-import net.asodev.islandutils.options.IslandOptions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -18,7 +17,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(PauseScreen.class)
 public class PauseScreenMixin extends Screen {
 
-    @Mutable @Shadow private void onDisconnect() {}
+    @Mutable
+    @Shadow
+    private void onDisconnect() {
+    }
 
     protected PauseScreenMixin(Component component) {
         super(component);
@@ -32,7 +34,8 @@ public class PauseScreenMixin extends Screen {
             )
     )
     private Button.Builder createPause(Component component, Button.OnPress onPress) {
-        if (!MccIslandState.isOnline() || !IslandOptions.getMisc().isPauseConfirm()) return Button.builder(component, onPress);
+        if (!MccIslandState.isOnline() || !IslandOptions.getMisc().isPauseConfirm())
+            return Button.builder(component, onPress);
         if (component == CommonComponents.GUI_DISCONNECT) {
             Component message = Component.literal("Are you sure you want to leave?").withStyle(ChatFormatting.AQUA);
             Component no = Component.literal("Cancel");
@@ -48,7 +51,9 @@ public class PauseScreenMixin extends Screen {
 
     void callback(boolean confirm, Button buttonx) {
         if (confirm) disconnect(buttonx);
-        else { Minecraft.getInstance().setScreen(new PauseScreen(true)); }
+        else {
+            Minecraft.getInstance().setScreen(new PauseScreen(true));
+        }
     }
 
     void disconnect(Button button) {

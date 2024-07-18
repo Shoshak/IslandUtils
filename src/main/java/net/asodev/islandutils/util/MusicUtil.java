@@ -4,9 +4,7 @@ import com.mojang.blaze3d.audio.Listener;
 import com.mojang.brigadier.context.CommandContext;
 import net.asodev.islandutils.mixins.accessors.SoundEngineAccessor;
 import net.asodev.islandutils.mixins.accessors.SoundManagerAccessor;
-import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.options.IslandSoundCategories;
-import net.asodev.islandutils.options.categories.MusicOptions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -19,7 +17,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import static net.minecraft.network.chat.Component.literal;
 
@@ -30,37 +30,52 @@ public class MusicUtil {
     public static void startMusic(ClientboundSoundPacket clientboundSoundPacket) {
         startMusic(clientboundSoundPacket, false);
     }
+
     public static void startMusic(ClientboundSoundPacket clientboundCustomSoundPacket, boolean bypassOvertimeCheck) {
         MusicOptions options = IslandOptions.getMusic();
         switch (MccIslandState.getGame()) {
-            case HITW -> { if (!options.isHitwMusic()) return; }
-            case TGTTOS -> { if (!options.isTgttosMusic()) return; }
-            case BATTLE_BOX -> { if (!options.isBbMusic()) return; }
-            case SKY_BATTLE -> { if (!options.isSbMusic()) return; }
-            case PARKOUR_WARRIOR_DOJO -> { if (!options.isPkwMusic()) return; }
+            case HITW -> {
+                if (!options.isHitwMusic()) return;
+            }
+            case TGTTOS -> {
+                if (!options.isTgttosMusic()) return;
+            }
+            case BATTLE_BOX -> {
+                if (!options.isBbMusic()) return;
+            }
+            case SKY_BATTLE -> {
+                if (!options.isSbMusic()) return;
+            }
+            case PARKOUR_WARRIOR_DOJO -> {
+                if (!options.isPkwMusic()) return;
+            }
             case PARKOUR_WARRIOR_SURVIVOR -> {
                 if (!options.isPkwsMusic()) return;
                 if (currentlyPlayingSound != null) return;
                 if (!bypassOvertimeCheck && isOvertimePlaying()) return;
             }
-            case DYNABALL -> { if (!options.isDynaballMusic()) return; }
-            case ROCKET_SPLEEF_RUSH -> { if (!options.isRsrMusic()) return; }
+            case DYNABALL -> {
+                if (!options.isDynaballMusic()) return;
+            }
+            case ROCKET_SPLEEF_RUSH -> {
+                if (!options.isRsrMusic()) return;
+            }
         }
 
         ResourceLocation location = MccIslandState.getGame().getMusicLocation();
         if (MccIslandState.getGame() == Game.HITW && IslandOptions.getClassicHITW().isClassicHITWMusic()) {
-            location = new ResourceLocation("island","island.music.classic_hitw");
+            location = new ResourceLocation("island", "island.music.classic_hitw");
             ChatUtils.send(literal("Now playing: ").withStyle(ChatFormatting.GREEN)
-                            .append(literal("Spacewall - Taylor Grover").withStyle(ChatFormatting.AQUA))
+                    .append(literal("Spacewall - Taylor Grover").withStyle(ChatFormatting.AQUA))
             );
         }
         if (location == null) return;
 
         float pitch = 1f;
         if (options.isTgttosDoubleTime() && MccIslandState.getGame() == Game.TGTTOS &&
-            Objects.equals(MccIslandState.getModifier(), "DOUBLE TIME")) {
-                pitch = 1.2f;
-                ChatUtils.debug("[MusicUtil] Double Time on TGTTOS active! (Pitch: %s)", pitch);
+                Objects.equals(MccIslandState.getModifier(), "DOUBLE TIME")) {
+            pitch = 1.2f;
+            ChatUtils.debug("[MusicUtil] Double Time on TGTTOS active! (Pitch: %s)", pitch);
         }
         if (options.isTgttosToTheDome() && MccIslandState.getGame() == Game.TGTTOS &&
                 Objects.equals(MccIslandState.getMap(), "TO THE DOME")) {
@@ -103,6 +118,7 @@ public class MusicUtil {
                 clientboundCustomSoundPacket.getZ(),
                 false);
     }
+
     public static SimpleSoundInstance createSoundInstance(ResourceLocation resourceLocation) {
         Vec3 listenerPosition = getListenerPosition();
         return new SimpleSoundInstance(
@@ -122,7 +138,7 @@ public class MusicUtil {
     }
 
     private static Vec3 getListenerPosition() {
-        SoundEngineAccessor soundEngine = (SoundEngineAccessor)((SoundManagerAccessor)Minecraft.getInstance().getSoundManager()).getSoundEngine();
+        SoundEngineAccessor soundEngine = (SoundEngineAccessor) ((SoundManagerAccessor) Minecraft.getInstance().getSoundManager()).getSoundEngine();
         Listener listener = soundEngine.getListener();
         return listener.getTransform().position();
     }
@@ -181,13 +197,15 @@ public class MusicUtil {
     public static boolean isMusicPlaying() {
         return currentlyPlayingSound != null && !currentlyPlayingSound.isStopped();
     }
+
     public static boolean isOvertimePlaying() {
         return isSoundsPlaying("music.global.overtime_intro_music", "music.global.overtime_loop_music");
     }
-    public static boolean isSoundsPlaying(String ...sounds) {
+
+    public static boolean isSoundsPlaying(String... sounds) {
         List<String> soundList = Arrays.stream(sounds).toList();
         SoundManager soundManager = Minecraft.getInstance().getSoundManager();
-        SoundEngineAccessor engine = (SoundEngineAccessor)((SoundManagerAccessor)soundManager).getSoundEngine();
+        SoundEngineAccessor engine = (SoundEngineAccessor) ((SoundManagerAccessor) soundManager).getSoundEngine();
         for (SoundInstance soundInstance : engine.getInstanceToChannel().keySet()) {
             if (!soundList.contains(soundInstance.getLocation().getPath())) continue;
             return true;

@@ -22,8 +22,7 @@ public class Hub implements IslandState {
         activity.setDetails(details);
         activity.assets().setLargeImage(name.toLowerCase());
         activity.assets().setLargeText(name);
-//        activity.setState("");
-//        activity.timestamps().setEnd(Instant.ofEpochSecond(0));
         return activity;
     }
+
 }

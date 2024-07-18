@@ -1,7 +1,6 @@
 package net.asodev.islandutils.mixins.ui;
 
 import net.asodev.islandutils.modules.ChatChannelButton;
-import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.util.PlainTextButtonNoShadow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
