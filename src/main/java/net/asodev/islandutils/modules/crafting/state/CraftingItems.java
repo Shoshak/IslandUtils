@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.asodev.islandutils.IslandConstants.islandFolder;
+import static net.asodev.islandutils.IslandConstants.ISLAND_FOLDER;
 
 public class CraftingItems {
     private final Logger logger = LoggerFactory.getLogger(CraftingItems.class);
-    private final File file = new File(islandFolder + "/crafting.json");
+    private final File file = new File(ISLAND_FOLDER + "/crafting.json");
     private final List<CraftingItem> items = new ArrayList<>();
 
     /**

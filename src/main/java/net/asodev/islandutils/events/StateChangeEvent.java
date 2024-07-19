@@ -3,17 +3,14 @@ package net.asodev.islandutils.events;
 import net.asodev.islandutils.state.IslandState;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.util.ActionResult;
 
 public interface StateChangeEvent {
     Event<StateChangeEvent> EVENT = EventFactory.createArrayBacked(StateChangeEvent.class,
             (listeners) -> (state) -> {
                 for (StateChangeEvent listener : listeners) {
-                    ActionResult result = listener.change(state);
-                    if (result != ActionResult.PASS) return result;
+                    listener.change(state);
                 }
-                return ActionResult.PASS;
             });
 
-    ActionResult change(IslandState state);
+    void change(IslandState state);
 }

@@ -1,115 +1,117 @@
 package net.asodev.islandutils.modules.crafting.state;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.asodev.islandutils.events.OnlineChangeEvent;
+import net.asodev.islandutils.events.OptionChangeEvent;
 import net.asodev.islandutils.modules.crafting.CraftingToast;
+import net.asodev.islandutils.options.IslandConfig;
 import net.asodev.islandutils.util.ChatUtils;
-import net.asodev.islandutils.util.MusicUtil;
-import net.asodev.islandutils.util.Scheduler;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.asodev.islandutils.util.SoundUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.util.List;
 
-import static net.asodev.islandutils.util.IslandUtilsCommand.cantUseDebugError;
-import static net.asodev.islandutils.util.Utils.MCC_HUD_FONT;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.asodev.islandutils.IslandConstants.MCC_HUD_FONT;
 
 public class CraftingNotifier implements ClientTickEvents.EndTick {
+    private boolean online = false;
+    private boolean enableCraftingNotifications = IslandConfig.HANDLER.instance().enableCraftingNotifications;
+    private boolean toastNotifications = IslandConfig.HANDLER.instance().toastNotifications;
+    private boolean chatNotifications = IslandConfig.HANDLER.instance().chatNotifications;
+    private final CraftingItems craftingItems;
     private int tick = 0;
 
-    public CraftingNotifier() {
+    public CraftingNotifier(CraftingItems craftingItems) {
+        this.craftingItems = craftingItems;
         ClientTickEvents.END_CLIENT_TICK.register(this);
+        OnlineChangeEvent.EVENT.register(online -> this.online = online);
+        OptionChangeEvent.EVENT.register(() -> {
+            IslandConfig config = IslandConfig.HANDLER.instance();
+            this.enableCraftingNotifications = config.enableCraftingNotifications;
+            this.toastNotifications = config.toastNotifications;
+            this.chatNotifications = config.chatNotifications;
+        });
     }
 
-    public void update(Minecraft client) {
+    public void update(MinecraftClient client) {
+        if (!online) return;
         boolean anythingHasChanged = false;
-        for (CraftingItem item : CraftingItems.getItems()) {
+        for (CraftingItem item : craftingItems.getItems()) {
             if (item.isComplete()) continue;
-            if (!MccIslandState.isOnline() || client.getOverlay() instanceof LoadingOverlay) continue;
             if (item.hasSentNotification()) continue;
 
-            sendNotif(client, item);
+            sendNotification(client, item);
             anythingHasChanged = true;
         }
-        if (anythingHasChanged) CraftingItems.save();
+        if (anythingHasChanged) craftingItems.save();
     }
 
-    public void sendNotif(Minecraft client, CraftingItem item) {
-        CraftingOptions options = IslandOptions.getCrafting();
+    public void sendNotification(MinecraftClient client, CraftingItem item) {
         item.setHasSentNotification(true);
 
-        if (!options.isEnableCraftingNotifs()) return;
+        if (!enableCraftingNotifications) return;
         boolean shouldMakeSound = false;
-        if (options.isToastNotif()) {
-            client.getToasts().addToast(new CraftingToast(item));
+        if (toastNotifications) {
+            client.getToastManager().add(new CraftingToast(item));
             shouldMakeSound = true;
         }
-        if (options.isChatNotif()) {
-            sendChatNotif(item);
+        if (chatNotifications) {
+            sendChatNotification(item);
             shouldMakeSound = true;
         }
 
         if (shouldMakeSound) {
-            sendNotifSound();
+            sendNotificationSound();
         }
     }
 
-    private void sendChatNotif(CraftingItem item) {
-        Style darkGreenColor = Style.EMPTY.withColor(ChatFormatting.DARK_GREEN);
-        Component component = Component.literal("(").withStyle(darkGreenColor)
+    private void sendChatNotification(CraftingItem item) {
+        Style darkGreenColor = Style.EMPTY.withColor(Formatting.DARK_GREEN);
+        Text component = Text.literal("(").setStyle(darkGreenColor)
                 .append(item.getTypeIcon())
-                .append(Component.literal(") ").withStyle(darkGreenColor))
+                .append(Text.literal(") ").setStyle(darkGreenColor))
                 .append(item.getTitle())
-                .append(Component.literal(" has finished crafting!").withStyle(darkGreenColor));
+                .append(Text.literal(" has finished crafting!").setStyle(darkGreenColor));
         ChatUtils.send(component);
     }
 
-    private void sendNotifSound() {
-        SimpleSoundInstance mcc = MusicUtil.createSoundInstance(new ResourceLocation("mcc", "ui.achievement_receive"));
-        Scheduler.schedule(5, (mc) -> {
-            mc.getSoundManager().play(mcc);
-        });
+    private void sendNotificationSound() {
+        SoundUtil.playSound(new Identifier("mcc", "ui.achievement_receive"));
     }
 
-    public static Component activeCraftsMessage() {
-        Component newLine = Component.literal("\n").withStyle(Style.EMPTY);
-        MutableComponent component = Component.literal("\nCRAFTING ITEMS:").withStyle(MCC_HUD_FONT);
+    public Text activeCraftsMessage() {
+        Text newLine = Text.literal("\n").setStyle(Style.EMPTY);
+        MutableText component = Text.literal("\nCRAFTING ITEMS:").setStyle(MCC_HUD_FONT);
         component.append(newLine);
 
         int i = 0;
-        List<CraftingItem> itemList = CraftingItems.getItems();
+        List<CraftingItem> itemList = craftingItems.getItems();
         for (CraftingItem item : itemList) {
             i++;
 
             long timeRemaining = item.getFinishesCrafting() - System.currentTimeMillis();
             String timeText;
-            ChatFormatting timeColor;
+            Formatting timeColor;
             if (timeRemaining > 0) {
                 timeText = DurationFormatUtils.formatDuration(timeRemaining, "H'h' m'm' s's'");
-                timeColor = ChatFormatting.RED;
+                timeColor = Formatting.RED;
             } else {
                 timeText = "Complete";
-                timeColor = ChatFormatting.DARK_GREEN;
+                timeColor = Formatting.DARK_GREEN;
             }
 
-            Component itemComponent = Component.literal(" ").withStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT))
+            Text itemComponent = Text.literal(" ").setStyle(Style.EMPTY.withFont(Style.DEFAULT_FONT_ID))
                     .append(item.getTypeIcon())
                     .append(" ")
                     .append(item.getTitle())
-                    .append(Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY))
-                    .append(Component.literal(timeText).withStyle(timeColor));
+                    .append(Text.literal(" - ").setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)))
+                    .append(Text.literal(timeText).setStyle(Style.EMPTY.withColor(timeColor)));
 
             component.append(itemComponent);
             if (i < itemList.size()) component.append(newLine);
@@ -118,7 +120,7 @@ public class CraftingNotifier implements ClientTickEvents.EndTick {
     }
 
     @Override
-    public void onEndTick(Minecraft client) {
+    public void onEndTick(MinecraftClient client) {
         tick++;
         if (tick >= 20) {
             update(client);
@@ -126,21 +128,21 @@ public class CraftingNotifier implements ClientTickEvents.EndTick {
         }
     }
 
-    public static LiteralArgumentBuilder<FabricClientCommandSource> getDebugCommand() {
-        return literal("add_craft")
-                .then(argument("color", StringArgumentType.string())
-                        .then(argument("slot", IntegerArgumentType.integer())
-                                .then(argument("delay", IntegerArgumentType.integer())
-                                        .executes(ctx -> {
-                                            if (!IslandOptions.getMisc().isDebugMode()) {
-                                                ctx.getSource().sendError(cantUseDebugError);
-                                                return 0;
-                                            }
-                                            String color = ctx.getArgument("color", String.class);
-                                            Integer slot = ctx.getArgument("slot", Integer.class);
-                                            Integer delay = ctx.getArgument("delay", Integer.class);
-                                            CraftingItems.addDebugItem(color, slot, delay);
-                                            return 1;
-                                        }))));
-    }
+//    public static LiteralArgumentBuilder<FabricClientCommandSource> getDebugCommand() {
+//        return literal("add_craft")
+//                .then(argument("color", StringArgumentType.string())
+//                        .then(argument("slot", IntegerArgumentType.integer())
+//                                .then(argument("delay", IntegerArgumentType.integer())
+//                                        .executes(ctx -> {
+//                                            if (!IslandOptions.getMisc().isDebugMode()) {
+//                                                ctx.getSource().sendError(cantUseDebugError);
+//                                                return 0;
+//                                            }
+//                                            String color = ctx.getArgument("color", String.class);
+//                                            Integer slot = ctx.getArgument("slot", Integer.class);
+//                                            Integer delay = ctx.getArgument("delay", Integer.class);
+//                                            CraftingItems.addDebugItem(color, slot, delay);
+//                                            return 1;
+//                                        }))));
+//    }
 }

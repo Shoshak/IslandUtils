@@ -1,24 +1,22 @@
 package net.asodev.islandutils.discord;
 
 import net.asodev.islandutils.IslandConstants;
-import net.asodev.islandutils.util.resourcepack.ResourcePackOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
 
 import static net.asodev.islandutils.util.Utils.assertIslandFolder;
 
 public class NativeLibrary {
     private final Logger logger = LoggerFactory.getLogger(NativeLibrary.class);
 
-    private final String os = System.getProperty("os.name").toLowerCase();;
+    private final String os = System.getProperty("os.name").toLowerCase();
+    ;
     private final String architecture = System
             .getProperty("os.arch")
             .toLowerCase()
@@ -35,18 +33,18 @@ public class NativeLibrary {
 
     public File getDiscordNative() throws Exception {
         String name = "discord_game_sdk";
-        String libIndex = "native/lib/" + architecture + "/" + name+extension;
+        String libIndex = "native/lib/" + architecture + "/" + name + extension;
         return getNatives(libIndex);
     }
 
     public File getDiscordJNI() throws Exception {
         String name = "discord_game_sdk_jni";
-        String libIndex = "native/"+os+"/"+architecture+"/"+name+extension;
+        String libIndex = "native/" + os + "/" + architecture + "/" + name + extension;
         return getNatives(libIndex);
     }
 
     private File getNatives(String libIndex) throws Exception {
-        File outFile = IslandConstants.islandFolder.resolve(libIndex).toFile();
+        File outFile = IslandConstants.ISLAND_FOLDER.resolve(libIndex).toFile();
         if (!outFile.exists()) {
             logger.info("Extracting Discord Natives.");
             InputStream stream = NativeLibrary.class.getResourceAsStream("/" + libIndex);

@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class ResourcePackOptions {
-    public static final Path packDataFile = IslandConstants.islandFolder.resolve("pack.json");
-    public static final Path packZip = IslandConstants.islandFolder.resolve("island_utils.zip");
+    public static final Path packDataFile = IslandConstants.ISLAND_FOLDER.resolve("pack.json");
+    public static final Path packZip = IslandConstants.ISLAND_FOLDER.resolve("island_utils.zip");
 
     public static ResourcePack data;
 
