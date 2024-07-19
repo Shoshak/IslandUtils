@@ -1,16 +1,14 @@
 package net.asodev.islandutils.util.resourcepack;
 
 import net.asodev.islandutils.IslandConstants;
-import net.asodev.islandutils.util.resourcepack.schema.ResourcePack;
 import net.asodev.islandutils.util.Utils;
-import net.fabricmc.loader.api.FabricLoader;
+import net.asodev.islandutils.util.resourcepack.schema.ResourcePack;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class ResourcePackOptions {
-
     public static final Path packDataFile = IslandConstants.islandFolder.resolve("pack.json");
     public static final Path packZip = IslandConstants.islandFolder.resolve("island_utils.zip");
 

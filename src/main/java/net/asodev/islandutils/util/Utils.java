@@ -1,7 +1,6 @@
 package net.asodev.islandutils.util;
 
 import net.asodev.islandutils.IslandConstants;
-import net.asodev.islandutils.util.resourcepack.ResourcePackOptions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -18,18 +17,18 @@ import net.minecraft.world.item.component.CustomModelData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Utils {
     private static final Logger logger = LoggerFactory.getLogger(Utils.class);
-    public static final ExecutorService savingQueue = Executors.newFixedThreadPool(2);
     public static final Style MCC_HUD_FONT = Style.EMPTY.withFont(new ResourceLocation("mcc", "hud"));
     public static final String BLANK_ITEM_ID = "island_interface.generic.blank";
     private static final List<String> NON_PROD_IP_HASHES = List.of(

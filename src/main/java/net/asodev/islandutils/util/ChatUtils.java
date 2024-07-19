@@ -1,11 +1,9 @@
 package net.asodev.islandutils.util;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +11,8 @@ import java.util.Optional;
 
 public class ChatUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger("IslandUtils");
-    public static final Style iconsFontStyle = Style.EMPTY.withColor(ChatFormatting.WHITE).withFont(new ResourceLocation("island", "icons"));
+    public static final Style iconsFontStyle =
+            Style.EMPTY.withColor(Formatting.WHITE).withFont(new Identifier("island", "icons"));
     public static final String prefix = "&b[&eIslandUtils&b]";
 
     public static String translate(String s) {
@@ -41,7 +40,7 @@ public class ChatUtils {
     }
 
     public static TextColor parseColor(String hex) {
-        Optional<TextColor> result = TextColor.parseColor(hex).result();
+        Optional<TextColor> result = TextColor.parse(hex).result();
         return result.orElse(null);
     }
 

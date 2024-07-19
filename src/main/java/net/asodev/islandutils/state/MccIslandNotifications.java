@@ -34,7 +34,7 @@ public class MccIslandNotifications {
         IslandConfig config = IslandConfig.HANDLER.instance();
         if (config.enableCraftingNotifications && config.notifyServerList) { // "i'm a never-nester"
             for (CraftingItem item : CraftingItems.getItems()) {
-                if (!item.isComplete()) continue;
+                if (item.isComplete()) continue;
                 craftingLists.add(Text.literal("  ").append(item.getTitle()));
                 anycomplete = true;
             }
