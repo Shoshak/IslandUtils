@@ -4,8 +4,8 @@ import net.asodev.islandutils.IslandConstants;
 import net.asodev.islandutils.util.Utils;
 import net.asodev.islandutils.util.resourcepack.schema.ResourcePack;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class ResourcePackOptions {
@@ -16,13 +16,11 @@ public class ResourcePackOptions {
 
     public static void save() throws IOException {
         Utils.assertIslandFolder();
-        Utils.writeFile(packDataFile.toFile(), data.toJson());
+        Files.writeString(packDataFile, data.toJson());
     }
 
-    public static ResourcePack get() throws Exception {
-        File packData = packDataFile.toFile();
-        String json = Utils.readFile(packData);
-        if (json == null) return null;
+    public static ResourcePack get() throws IOException {
+        String json = Files.readString(packDataFile);
 
         data = ResourcePack.fromJson(json);
         return data;

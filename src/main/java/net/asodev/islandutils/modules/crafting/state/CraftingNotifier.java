@@ -15,6 +15,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import java.io.IOException;
 import java.util.List;
 
 import static net.asodev.islandutils.IslandConstants.MCC_HUD_FONT;
@@ -49,7 +50,13 @@ public class CraftingNotifier implements ClientTickEvents.EndTick {
             sendNotification(client, item);
             anythingHasChanged = true;
         }
-        if (anythingHasChanged) craftingItems.save();
+        if (anythingHasChanged) {
+            try {
+                craftingItems.save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void sendNotification(MinecraftClient client, CraftingItem item) {

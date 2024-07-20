@@ -12,8 +12,9 @@ import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ import static net.asodev.islandutils.IslandConstants.ISLAND_FOLDER;
 
 public class CraftingItems {
     private final Logger logger = LoggerFactory.getLogger(CraftingItems.class);
-    private final File file = new File(ISLAND_FOLDER + "/crafting.json");
+    private final Path file = ISLAND_FOLDER.resolve("crafting.json");
     private final List<CraftingItem> items = new ArrayList<>();
 
     /**
@@ -51,16 +52,14 @@ public class CraftingItems {
         return items;
     }
 
-    public void load() throws Exception {
-        String string = Utils.readFile(file);
-        if (string == null) return;
-
+    public void load() throws IOException {
+        String string = Files.readString(file);
         JsonObject object = new Gson().fromJson(string, JsonObject.class);
         JsonArray array = object.get("items").getAsJsonArray();
         array.forEach(element -> items.add(CraftingItem.fromJson(element)));
     }
 
-    public void save() {
+    public void save() throws IOException {
         Utils.assertIslandFolder();
         JsonArray array = new JsonArray();
         for (CraftingItem item : getItems()) {
@@ -70,12 +69,7 @@ public class CraftingItems {
         object.add("items", array);
         object.addProperty("savedAt", System.currentTimeMillis());
         object.addProperty("version", 1);
-        try {
-            Utils.writeFile(file, object.toString());
-            logger.info("Saved Crafting Items");
-        } catch (IOException e) {
-            logger.error("Failed to save crafting items", e);
-        }
+        Files.writeString(file, object.toString());
     }
 
     // DEBUG

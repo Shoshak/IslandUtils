@@ -10,7 +10,6 @@ import net.asodev.islandutils.modules.plobby.PlobbyJoinCodeCopy;
 import net.asodev.islandutils.modules.splits.SplitManager;
 import net.asodev.islandutils.modules.splits.ui.SplitUI;
 import net.asodev.islandutils.util.ChatUtils;
-import net.asodev.islandutils.util.IslandUtilsCommand;
 import net.asodev.islandutils.util.MusicUtil;
 import net.asodev.islandutils.util.Utils;
 import net.fabricmc.api.ClientModInitializer;
@@ -45,7 +44,6 @@ public class IslandUtilsClient implements ClientModInitializer {
         SplitManager.init();
         DisguiseKeybind.registerDisguiseInput();
         PlobbyFeatures.registerEvents();
-        IslandUtilsCommand.register();
         new DiscordPresenceUpdater();
         PlobbyJoinCodeCopy.register();
 
