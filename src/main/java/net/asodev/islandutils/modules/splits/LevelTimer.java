@@ -1,7 +1,6 @@
 package net.asodev.islandutils.modules.splits;
 
 import net.asodev.islandutils.modules.splits.ui.DojoSplitUI;
-import net.asodev.islandutils.modules.splits.ui.SplitUI;
 import net.asodev.islandutils.util.ChatUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -12,6 +11,8 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.regex.Matcher;
@@ -29,6 +30,8 @@ public class LevelTimer {
 
     private boolean isBetween = true; // If the player is inbetween levels;
     public final SplitsCategory options = IslandOptions.getSplits();
+
+    private final Logger logger = LoggerFactory.getLogger(LevelSplits.class);
 
     public LevelTimer(LevelSplits splits) {
         this.splits = splits;
@@ -63,7 +66,7 @@ public class LevelTimer {
             }
             hashString.append(levelName);
             levelUid = hashString.toString();
-            ChatUtils.debug("Detected level with id: " + levelUid);
+            logger.debug("Detected level with id: {}", levelUid);
         }
     }
 
@@ -149,7 +152,7 @@ public class LevelTimer {
         }
     }
 
-    public static void onSound(ClientboundSoundPacket clientboundSoundPacket) {
+    public void onSound(ClientboundSoundPacket clientboundSoundPacket) {
         if (!IslandOptions.getSplits().isEnablePkwSplits()) return;
         ResourceLocation soundLoc = clientboundSoundPacket.getSound().value().getLocation();
         String path = soundLoc.getPath();
@@ -164,14 +167,14 @@ public class LevelTimer {
                 currentInstance.saveSplit();
             }
             setInstance(null);
-            ChatUtils.debug("LevelTimer - Ended timer");
+            logger.debug("LevelTimer - Ended timer");
         } else if (path.equals("games.global.countdown.go")) {
             LevelSplits splits = null;
             if (MccIslandState.getGame() == Game.PARKOUR_WARRIOR_DOJO) {
                 splits = SplitManager.getCourseSplits(MccIslandState.getMap());
             }
             setInstance(new LevelTimer(splits));
-            ChatUtils.debug("LevelTimer - Started timer!");
+            logger.debug("LevelTimer - Started timer!");
         }
     }
 

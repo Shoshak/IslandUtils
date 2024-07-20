@@ -1,11 +1,11 @@
 package net.asodev.islandutils.discord;
 
 import de.jcm.discordgamesdk.activity.Activity;
+import net.asodev.islandutils.events.OnlineChangeEvent;
 import net.asodev.islandutils.events.OptionChangeEvent;
 import net.asodev.islandutils.events.StateChangeEvent;
 import net.asodev.islandutils.options.IslandConfig;
 import net.asodev.islandutils.state.IslandState;
-import net.minecraft.util.ActionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,14 +20,14 @@ public class DiscordPresenceUpdater {
     public DiscordPresenceUpdater() {
         this.discordPresence = IslandConfig.HANDLER.instance().discordPresence;
 
-        StateChangeEvent.EVENT.register(state -> {
-            updateActivity(state);
-            return ActionResult.PASS;
-        });
-
-        OptionChangeEvent.EVENT.register(() -> {
-            this.discordPresence = IslandConfig.HANDLER.instance().discordPresence;
-            return ActionResult.PASS;
+        StateChangeEvent.EVENT.register(this::updateActivity);
+        OptionChangeEvent.EVENT.register(() -> this.discordPresence = IslandConfig.HANDLER.instance().discordPresence);
+        OnlineChangeEvent.EVENT.register(online -> {
+            if (!online) {
+                DiscordPresence
+                        .getInstance()
+                        .closeCore();
+            }
         });
     }
 

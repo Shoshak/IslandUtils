@@ -1,6 +1,5 @@
 package net.asodev.islandutils.mixins;
 
-import net.asodev.islandutils.modules.splits.ui.SplitUI;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.gui.components.LerpingBossEvent;
@@ -11,11 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * We're using a mixin rather than HudRenderCallback because
@@ -26,7 +21,9 @@ import java.util.UUID;
 @Mixin(BossHealthOverlay.class)
 public class BossUIMixin {
 
-    @Shadow @Final private Map<UUID, LerpingBossEvent> events;
+    @Shadow
+    @Final
+    private Map<UUID, LerpingBossEvent> events;
 
     @Inject(method = "render", at = @At("HEAD"))
     private void render(GuiGraphics guiGraphics, CallbackInfo ci) {

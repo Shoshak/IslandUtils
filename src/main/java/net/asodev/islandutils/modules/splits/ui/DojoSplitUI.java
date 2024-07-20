@@ -1,6 +1,7 @@
 package net.asodev.islandutils.modules.splits.ui;
 
 import net.asodev.islandutils.modules.splits.LevelTimer;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -8,11 +9,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DojoSplitUI implements SplitUI {
+public class DojoSplitUI {
     private static final ResourceLocation BAR_TEXTURE = new ResourceLocation("island", "textures/gui/pkw_splits.png");
     private static final int MCC_BAR_WIDTH = 130;
     public static Style MCC_HUD_STYLE = Style.EMPTY.withFont(new ResourceLocation("mcc", "hud"));
+    private final Logger logger = LoggerFactory.getLogger(DojoSplitUI.class);
 
     private LevelTimer timer;
 
@@ -32,6 +36,7 @@ public class DojoSplitUI implements SplitUI {
             renderSplitImprovement(guiGraphics, x, y);
         }
     }
+
     public void renderLevelName(GuiGraphics guiGraphics, int x, int y) {
         Font font = Minecraft.getInstance().font; // Minecraft is incapable of getting this itself
         Component levelName = Component.literal(timer.getLevelName()).withStyle(MCC_HUD_STYLE);
@@ -73,10 +78,22 @@ public class DojoSplitUI implements SplitUI {
         guiGraphics.drawString(font, improvementTime, tx, ty, 16777215 | 255 << 24, true);
     }
 
+    public void renderInstance(GuiGraphics guiGraphics, int bossBars) {
+        LevelTimer instance = LevelTimer.getInstance();
+        if (instance != null && instance.getUI() != null) instance.getUI().render(guiGraphics, bossBars);
+    }
+
+    public void setupFallbackRenderer() {
+        logger.debug("Setup fallback renderer for SplitUI");
+        HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
+            renderInstance(drawContext, 1);
+        });
+    }
 
     private int width() {
         return 130;
     }
+
     private int height() {
         return 12;
     }

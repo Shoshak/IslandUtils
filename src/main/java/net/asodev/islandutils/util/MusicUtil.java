@@ -16,6 +16,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Objects;
 import static net.minecraft.network.chat.Component.literal;
 
 public class MusicUtil {
+    private static final Logger logger = LoggerFactory.getLogger(MusicUtil.class);
 
     public static MCCSoundInstance currentlyPlayingSound = null;
 
@@ -75,15 +78,15 @@ public class MusicUtil {
         if (options.isTgttosDoubleTime() && MccIslandState.getGame() == Game.TGTTOS &&
                 Objects.equals(MccIslandState.getModifier(), "DOUBLE TIME")) {
             pitch = 1.2f;
-            ChatUtils.debug("[MusicUtil] Double Time on TGTTOS active! (Pitch: %s)", pitch);
+            logger.debug("[MusicUtil] Double Time on TGTTOS active! (Pitch: {})", pitch);
         }
         if (options.isTgttosToTheDome() && MccIslandState.getGame() == Game.TGTTOS &&
                 Objects.equals(MccIslandState.getMap(), "TO THE DOME")) {
             location = new ResourceLocation("island", "island.music.to_the_dome");
-            ChatUtils.debug("[MusicUtil] To The Dome on TGTTOS active!");
+            logger.debug("[MusicUtil] To The Dome on TGTTOS active!");
         }
 
-        ChatUtils.debug("[MusicUtil] Starting: " + location);
+        logger.debug("[MusicUtil] Starting: {}", location);
         stopMusic();
 
         MCCSoundInstance instance = new MCCSoundInstance(
@@ -151,7 +154,7 @@ public class MusicUtil {
         if (currentlyPlayingSound != null) {
             if (!instant) {
                 currentlyPlayingSound.fade(20);
-                ChatUtils.debug("[MusicUtil] Fading: " + currentlyPlayingSound);
+                logger.debug("[MusicUtil] Fading: {}", currentlyPlayingSound);
             } else {
                 currentlyPlayingSound.stopFwd();
             }
@@ -161,7 +164,7 @@ public class MusicUtil {
         ResourceLocation location = MccIslandState.getGame().getMusicLocation();
         if (location == null) return;
 
-        ChatUtils.debug("[MusicUtil] Stopping: " + location.getPath());
+        logger.debug("[MusicUtil] Stopping: {}", location.getPath());
         Minecraft.getInstance().getSoundManager().stop(location, IslandSoundCategories.GAME_MUSIC);
     }
 

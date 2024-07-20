@@ -5,7 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.asodev.islandutils.IslandUtilsEvents;
-import net.asodev.islandutils.util.ChatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +37,9 @@ public class SplitManager {
             levelSplits = new LevelSplits(name);
             levelSplits.setExpires(currentCourseExpiry);
             courseSplits.put(name, levelSplits);
-            ChatUtils.debug("LevelTimer - Created splits for: " + name);
+            logger.debug("LevelTimer - Created splits for: {}", name);
         } else {
-            ChatUtils.debug("SplitManager - Found splits for: " + name);
+            logger.debug("SplitManager - Found splits for: {}", name);
         }
         return levelSplits;
     }

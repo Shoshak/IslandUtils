@@ -11,11 +11,15 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
 
 public class CraftingUI {
+    private final Logger logger = LoggerFactory.getLogger(CraftingUI.class);
+
     public static Style CHEST_BACKGROUND_STYLE = Style.EMPTY.withColor(ChatFormatting.WHITE).withFont(new ResourceLocation("mcc", "chest_backgrounds"));
     private static Component assemblerComponent;
     private static Component forgeComponent;
@@ -29,7 +33,8 @@ public class CraftingUI {
     }
 
     private static TextColor timeLeftColor = ChatUtils.parseColor("#FF5556");
-    public static void analyseCraftingItem(CraftingMenuType type, ItemStack item, int slot) {
+
+    public void analyseCraftingItem(CraftingMenuType type, ItemStack item, int slot) {
         if (!isInputSlot(slot)) {
             CraftingItems.removeSlot(type, slot);
             return;
@@ -59,18 +64,19 @@ public class CraftingUI {
 
                 CraftingItems.addItem(craftingItem);
 
-                ChatUtils.debug("[#" + slot + " " + type.name() + "] Found active craft: " + item.getDisplayName().getString() + " (" + timeLeft + ")");
+                logger.debug("[#{} {}] Found active craft: {} ({})", slot, type.name(), item.getDisplayName().getString(), timeLeft);
                 return;
             }
         }
 
         CraftingItems.removeSlot(type, slot);
-        ChatUtils.debug(type.name() + " - Found empty craft slot: " + slot + "!");
+        logger.debug("{} - Found empty craft slot: {}!", type.name(), slot);
     }
 
     private static boolean isActive(List<Component> lores) {
         return lores.stream().anyMatch(p -> p.getString().contains("Shift-Click to Cancel"));
     }
+
     private static boolean isInputSlot(int slot) {
         return slot >= 19 && slot <= 23;
     }
@@ -78,6 +84,7 @@ public class CraftingUI {
     public static void setAssemblerCharacter(String assemblerCharacter) {
         CraftingUI.assemblerComponent = Component.literal(assemblerCharacter).withStyle(CHEST_BACKGROUND_STYLE);
     }
+
     public static void setForgeCharacter(String forgeCharacter) {
         CraftingUI.forgeComponent = Component.literal(forgeCharacter).withStyle(CHEST_BACKGROUND_STYLE);
     }

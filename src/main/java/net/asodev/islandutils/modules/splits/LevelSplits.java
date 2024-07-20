@@ -3,7 +3,8 @@ package net.asodev.islandutils.modules.splits;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.asodev.islandutils.util.ChatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -13,6 +14,8 @@ public class LevelSplits {
     private Long expires = null;
     private Map<String, Split> splits = new HashMap<>();
     private Map<String, String> levelNames = new HashMap<>();
+
+    private Logger logger = LoggerFactory.getLogger(LevelSplits.class);
 
     public LevelSplits(String name) {
         this.name = name;
@@ -41,7 +44,7 @@ public class LevelSplits {
 
         splits.put(uid, currentSplit);
         levelNames.put(uid, name);
-        ChatUtils.debug("LevelSplits - Time (" + time + "ms) was saved with uid: " + uid);
+        logger.debug("LevelSplits - Time ({}ms) was saved with uid: {}", time, uid);
         SplitManager.saveAsync();
     }
 

@@ -1,7 +1,6 @@
 package net.asodev.islandutils.mixins.splits;
 
 import net.asodev.islandutils.modules.splits.SplitManager;
-import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.TimeUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -10,7 +9,10 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -18,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(value = ClientPacketListener.class, priority = 990)
 public class HologramMixin {
+    @Unique
+    private final Logger logger = LoggerFactory.getLogger(HologramMixin.class);
     TextColor redColor = TextColor.fromLegacyFormat(ChatFormatting.RED);
     TextColor yellowColor = TextColor.fromLegacyFormat(ChatFormatting.YELLOW);
 
@@ -35,7 +39,7 @@ public class HologramMixin {
         String name = customName.getString();
         long seconds = TimeUtil.getTimeSeconds(name);
 
-        ChatUtils.debug("Found course expiry: " + name + " (" + seconds + ")");
+        logger.debug("Found course expiry: {} ({})", name, seconds);
         SplitManager.setCurrentCourseExpiry(System.currentTimeMillis() + (seconds * 1000L));
     }
 

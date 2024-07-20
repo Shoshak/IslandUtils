@@ -14,6 +14,8 @@ import net.minecraft.network.listener.ClientCommonPacketListener;
 import net.minecraft.network.listener.ClientPacketListener;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.text.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,6 +34,9 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
 
     @Unique
     private final ClassicAnnouncer announcer = new ClassicAnnouncer(ChatUtils.parseColor("#FFA800"));
+
+    @Unique
+    private final Logger logger = LoggerFactory.getLogger(PacketListenerMixin.class);
 
     // Patterns for the Map & Modifier options on scoreboard
     final Map<String, Pattern> scoreboardPatterns = Map.of(
@@ -67,7 +72,7 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
                     case "LEAP" -> DiscordPresenceUpdater.leapScoreboardUpdate(value, true);
                 }
 
-                ChatUtils.debug("ScoreboardUpdate - Current %s: \"%s\"", entry.getKey(), value);
+                logger.debug("ScoreboardUpdate - Current {}: \"{}\"", entry.getKey(), value);
             }
         } catch (Exception ignored) {
         }
@@ -104,7 +109,7 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
                 // We're playing battlebox, and the music needs to start early.
                 if (Objects.equals(soundLoc.getPath(), "music.global.gameintro")) {
                     MusicUtil.startMusic(clientboundCustomSoundPacket); // Start the music!!
-                    ChatUtils.debug("[PacketListener] Canceling gameintro");
+                    logger.debug("[PacketListener] Canceling gameintro");
                     ci.cancel(); // Stop minecraft from minecrafting
                     return;
                 }
