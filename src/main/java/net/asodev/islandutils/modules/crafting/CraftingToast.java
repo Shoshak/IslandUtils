@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier;
 import static net.asodev.islandutils.IslandConstants.MCC_HUD_FONT;
 
 public class CraftingToast implements Toast {
-    private final Identifier ISLAND_TOASTS_TEXTURE = new Identifier("island", "textures/gui/toasts.png");
+    private final Identifier ISLAND_TOASTS_TEXTURE = Identifier.of("island", "textures/gui/toasts.png");
 
     ItemStack itemStack;
     Text displayName;

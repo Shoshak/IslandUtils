@@ -1,15 +1,15 @@
 package net.asodev.islandutils;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.asodev.islandutils.discord.DiscordPresenceUpdater;
 import net.asodev.islandutils.modules.DisguiseKeybind;
 import net.asodev.islandutils.modules.NoxesiumIntegration;
 import net.asodev.islandutils.modules.plobby.PlobbyFeatures;
 import net.asodev.islandutils.modules.plobby.PlobbyJoinCodeCopy;
 import net.asodev.islandutils.modules.splits.SplitManager;
+import net.asodev.islandutils.state.IslandStateHolder;
+import net.asodev.islandutils.state.OnlineStateHandler;
 import net.asodev.islandutils.util.ChatUtils;
-import net.asodev.islandutils.util.MusicUtil;
 import net.asodev.islandutils.util.Utils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -50,6 +50,9 @@ public class IslandUtilsClient implements ClientModInitializer {
             SplitUI.setupFallbackRenderer();
         }
         new NoxesiumIntegration().init();
+
+        new IslandStateHolder();
+        new OnlineStateHandler();
     }
 
     public static void onJoinMCCI(boolean isProduction) {
@@ -69,12 +72,5 @@ public class IslandUtilsClient implements ClientModInitializer {
         DiscordPresenceUpdater.create(!isProduction);
         MccIslandState.setGame(Game.HUB);
         IslandUtilsEvents.JOIN_MCCI.invoker().onEvent();
-    }
-
-    public static class Commands {
-        public static LiteralArgumentBuilder<?> resetMusic = net.minecraft.commands.Commands.literal("resetmusic").executes(ctx -> {
-            MusicUtil.resetMusic(ctx);
-            return 1;
-        });
     }
 }

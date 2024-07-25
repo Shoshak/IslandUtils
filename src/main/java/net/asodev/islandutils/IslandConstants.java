@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 public class IslandConstants {
     public static final Path ISLAND_FOLDER = FabricLoader.getInstance().getConfigDir().resolve("islandutils_resources");
-    public static final Style MCC_HUD_FONT = Style.EMPTY.withFont(new Identifier("mcc", "hud"));
+    public static final Style MCC_HUD_FONT = Style.EMPTY.withFont(Identifier.of("mcc", "hud"));
     public static final Text CANT_USE_DEBUG_ERROR = Text.literal(ChatUtils.translate("You must be in debug mode to use the debug command."));
     public static final Style ICONS_FONT_STYLE = Style.EMPTY.withColor(Formatting.WHITE).withFont(new Identifier(
             "island", "icons"));

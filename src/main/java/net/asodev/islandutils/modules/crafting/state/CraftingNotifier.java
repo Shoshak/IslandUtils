@@ -4,8 +4,11 @@ import net.asodev.islandutils.events.OnlineChangeEvent;
 import net.asodev.islandutils.events.OptionChangeEvent;
 import net.asodev.islandutils.modules.crafting.CraftingToast;
 import net.asodev.islandutils.options.IslandConfig;
+import net.asodev.islandutils.options.IslandSoundCategories;
 import net.asodev.islandutils.util.ChatUtils;
-import net.asodev.islandutils.util.SoundUtil;
+import net.asodev.islandutils.util.sounds.MCCSound;
+import net.asodev.islandutils.util.sounds.SoundBuilder;
+import net.asodev.islandutils.util.sounds.SoundUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
@@ -89,7 +92,11 @@ public class CraftingNotifier implements ClientTickEvents.EndTick {
     }
 
     private void sendNotificationSound() {
-        SoundUtil.playSound(new Identifier("mcc", "ui.achievement_receive"));
+        MCCSound sound = new SoundBuilder()
+                .setIdentifier(Identifier.of("mcc", "ui.achievement_receive"))
+                .setCategory(IslandSoundCategories.SOUND_EFFECTS)
+                .build();
+        SoundUtil.playSound(sound);
     }
 
     public Text activeCraftsMessage() {

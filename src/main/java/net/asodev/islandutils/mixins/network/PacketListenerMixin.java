@@ -1,7 +1,9 @@
 package net.asodev.islandutils.mixins.network;
 
+import com.mojang.brigadier.ParseResults;
 import net.asodev.islandutils.IslandUtilsEvents;
 import net.asodev.islandutils.discord.DiscordPresenceUpdater;
+import net.asodev.islandutils.events.PlaySoundEvent;
 import net.asodev.islandutils.modules.ClassicAnnouncer;
 import net.asodev.islandutils.modules.cosmetics.CosmeticSlot;
 import net.asodev.islandutils.modules.cosmetics.CosmeticState;
@@ -9,28 +11,35 @@ import net.asodev.islandutils.modules.splits.LevelTimer;
 import net.asodev.islandutils.options.IslandSoundCategories;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.MusicUtil;
+import net.asodev.islandutils.util.sounds.SoundUtil;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.command.CommandSource;
 import net.minecraft.network.listener.ClientCommonPacketListener;
-import net.minecraft.network.listener.ClientPacketListener;
 import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.random.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class PacketListenerMixin implements ClientCommonPacketListener {
+
+    @Shadow
+    protected abstract ParseResults<CommandSource> parse(String command);
 
     @Unique
     private final ClassicAnnouncer announcer = new ClassicAnnouncer(ChatUtils.parseColor("#FFA800"));
@@ -80,58 +89,32 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
 
     @Inject(method = "onPlaySound", at = @At("HEAD"), cancellable = true)
     public void handleCustomSoundEvent(PlaySoundS2CPacket packet, CallbackInfo ci) {
-        PacketUtils.ensureRunningOnSameThread(clientboundCustomSoundPacket, (ClientPacketListener) (Object) this, this.minecraft);
-        if (!MccIslandState.isOnline()) return;
+        SoundEvent sound = packet.getSound().value();
+        PlaySoundEvent.EVENT.invoker().soundPlayed(sound);
 
-        // Get the location of the new sound
-        // Previously this was obfuscated by noxcrew, but not anymore yayyyyy :D
-        ResourceLocation soundLoc = clientboundCustomSoundPacket.getSound().value().getLocation();
-
-        if (MccIslandState.getGame() == Game.PARKOUR_WARRIOR_DOJO) {
-            LevelTimer.onSound(clientboundCustomSoundPacket);
+        String path = sound.getId().getPath();
+        SoundCategory category;
+        if (path.contains("music.global")) {
+            // If our sound is music, play in the Core Music slider
+            category = IslandSoundCategories.CORE_MUSIC;
+        } else if (sound.getId().getNamespace().contains("mcc")) {
+            // If it's a MCC sound, we'll just play it in sound effects
+            category = IslandSoundCategories.SOUND_EFFECTS;
+        } else {
+            return;
         }
-
-        // If we aren't in a game, don't play music
-        if (MccIslandState.getGame() != Game.HUB) {
-            // Use the sound files above to determine what just happened in the game
-            if (MccIslandState.getGame() != Game.BATTLE_BOX) {
-
-                // Stop the music if you restart the course or switch game mode in Parkour Warrior
-                if (soundLoc.getPath().contains("games.parkour_warrior.mode_swap") || soundLoc.getPath().contains("games.parkour_warrior.restart_course")) {
-                    MusicUtil.stopMusic(false);
-                }
-                if (MccIslandState.getGame() == Game.PARKOUR_WARRIOR_SURVIVOR && Objects.equals(soundLoc.getPath(), "games.global.early_elimination")) {
-                    MusicUtil.startMusic(clientboundCustomSoundPacket, true); // The game started. Start the music!!
-                } else if (Objects.equals(soundLoc.getPath(), "games.global.countdown.go") && !MusicUtil.isMusicPlaying()) {
-                    MusicUtil.startMusic(clientboundCustomSoundPacket); // The game started. Start the music!!
-                }
-            } else {
-                // We're playing battlebox, and the music needs to start early.
-                if (Objects.equals(soundLoc.getPath(), "music.global.gameintro")) {
-                    MusicUtil.startMusic(clientboundCustomSoundPacket); // Start the music!!
-                    logger.debug("[PacketListener] Canceling gameintro");
-                    ci.cancel(); // Stop minecraft from minecrafting
-                    return;
-                }
-            }
-            if (Objects.equals(soundLoc.getPath(), "games.global.timer.round_end")
-                    || soundLoc.getPath().startsWith("music.global.")) {
-                // The game ended or is about to end. Stop the music!!
-                MusicUtil.stopMusic();
-            }
-        }
-
-        SoundInstance instance;
-        // If our sound is music, play in the Core Music slider
-        if (soundLoc.getPath().contains("music.global")) {
-            instance = MusicUtil.createSoundInstance(clientboundCustomSoundPacket, IslandSoundCategories.CORE_MUSIC); // Create the sound
-            Minecraft.getInstance().getSoundManager().play(instance); // Play the sound
-            ci.cancel(); // Stop minecraft from trying.
-        } else if (soundLoc.getNamespace().equals("mcc")) { // If it's a MCC sound, we'll just play it in sound effects.
-            instance = MusicUtil.createSoundInstance(clientboundCustomSoundPacket, IslandSoundCategories.SOUND_EFFECTS); // Make the sound
-            Minecraft.getInstance().getSoundManager().play(instance); // Play the sound
-            ci.cancel(); // Minecraft no
-        }
+        PositionedSoundInstance soundInstance = new PositionedSoundInstance(
+                packet.getSound().value(),
+                category,
+                packet.getVolume(),
+                packet.getPitch(),
+                Random.create(),
+                packet.getX(),
+                packet.getY(),
+                packet.getZ()
+        );
+        SoundUtil.playSound(soundInstance);
+        ci.cancel();
     }
 
     @Inject(method = "onInventory", at = @At("TAIL"))
@@ -146,18 +129,8 @@ public abstract class PacketListenerMixin implements ClientCommonPacketListener 
         CosmeticState.accessorySlot.setOriginal(new CosmeticSlot(player.getInventory().offhand.get(0)));
     }
 
-    @Inject(method = "onPlayerRespawn", at = @At("HEAD")) // Whenever we change worlds
-    private void handleRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci) {
-        ClientLevel clientLevel = this.minecraft.level; // Get our player
-        if (clientLevel == null) return; // minecraft is a good game.
-
-        ResourceKey<Level> resourceKey = clientboundRespawnPacket.commonPlayerSpawnInfo().dimension(); // Get the key of this world
-        if (resourceKey != clientLevel.dimension()) { // If we have changed worlds...
-            MusicUtil.stopMusic(); // ...stop the music
-        }
-    }
-
-    private static Pattern timerPattern = Pattern.compile("(\\d+:\\d+)");
+    @Unique
+    private static final Pattern timerPattern = Pattern.compile("(\\d+:\\d+)");
 
     @Inject(method = "onBossBar", at = @At("HEAD")) // Discord presence, time left
     private void handleBossUpdate(BossBarS2CPacket packet, CallbackInfo ci) {

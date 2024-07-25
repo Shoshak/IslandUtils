@@ -19,7 +19,9 @@ public class ChatUtils {
 
     public static void send(Text component) {
         MinecraftClient client = MinecraftClient.getInstance();
-        assert client.player != null;
+        if (client.player == null) {
+            throw new IllegalStateException("Player is null, could not send message");
+        }
         client.player.sendMessage(component);
     }
 

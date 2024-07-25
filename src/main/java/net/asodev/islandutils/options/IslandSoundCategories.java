@@ -1,12 +1,12 @@
 package net.asodev.islandutils.options;
 
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.sound.SoundCategory;
 
 public class IslandSoundCategories {
 
-    public static SoundSource[] before;
+    public static SoundCategory[] before;
 
-    public static SoundSource GAME_MUSIC;
-    public static SoundSource CORE_MUSIC;
-    public static SoundSource SOUND_EFFECTS;
+    public static SoundCategory GAME_MUSIC;
+    public static SoundCategory CORE_MUSIC;
+    public static SoundCategory SOUND_EFFECTS;
 }

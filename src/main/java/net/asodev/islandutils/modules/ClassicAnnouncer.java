@@ -1,15 +1,9 @@
 package net.asodev.islandutils.modules;
 
 import net.asodev.islandutils.util.MusicUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static net.minecraft.network.chat.Component.literal;
 
 public class ClassicAnnouncer {
     private long lastTrapTimestamp;

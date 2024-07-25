@@ -1,6 +1,10 @@
-package net.asodev.islandutils.state;
+package net.asodev.islandutils.state.states;
 
 import de.jcm.discordgamesdk.activity.Activity;
+import net.asodev.islandutils.state.IslandState;
+import net.asodev.islandutils.util.sounds.MCCSound;
+
+import java.util.Optional;
 
 public class Hub implements IslandState {
     private static final String name = "Hub";
@@ -25,4 +29,8 @@ public class Hub implements IslandState {
         return activity;
     }
 
+    @Override
+    public Optional<MCCSound> music() {
+        return Optional.empty();
+    }
 }

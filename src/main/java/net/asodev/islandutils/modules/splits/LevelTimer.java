@@ -1,5 +1,6 @@
 package net.asodev.islandutils.modules.splits;
 
+import net.asodev.islandutils.events.PlaySoundEvent;
 import net.asodev.islandutils.modules.splits.ui.DojoSplitUI;
 import net.asodev.islandutils.util.ChatUtils;
 import net.minecraft.ChatFormatting;
@@ -9,8 +10,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sound.SoundEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,6 +42,7 @@ public class LevelTimer {
         if (options.isShowTimer()) {
             this.splitUI = new DojoSplitUI(this);
         }
+        PlaySoundEvent.EVENT.register(this::onSound);
     }
 
     public void handleSubtitle(ClientboundSetSubtitleTextPacket subtitle, CallbackInfo ci) {
@@ -152,11 +154,9 @@ public class LevelTimer {
         }
     }
 
-    public void onSound(ClientboundSoundPacket clientboundSoundPacket) {
-        if (!IslandOptions.getSplits().isEnablePkwSplits()) return;
-        ResourceLocation soundLoc = clientboundSoundPacket.getSound().value().getLocation();
-        String path = soundLoc.getPath();
-        boolean isRoundEnd = path.equals("games.global.timer.round_end");
+    public void onSound(SoundEvent sound) {
+        String path = sound.getId().getPath();
+        boolean isRoundEnd = path.contains("games.global.timer.round_end");
         if (path.contains("games.parkour_warrior.mode_swap") ||
                 path.contains("games.parkour_warrior.restart_course") ||
                 isRoundEnd ||
